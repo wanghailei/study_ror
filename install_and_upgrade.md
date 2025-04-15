@@ -265,7 +265,7 @@ After the gems have been installed, Bundler can help you update them when new ve
 
 ## Install Rails
 
-==🚫 Avoid sudo gem install rails. Always install Rails in **user space** when using rbenv.== You **should NOT** use `sudo gem install rails` unless you are installing Rails system-wide and fully understand the implications. Instead, install Rails without `sudo`, using Bundler and rbenv.
+==🚫 Avoid `sudo gem install rails`. Always install Rails in **user space** when using rbenv.== You **should NOT** use `sudo gem install rails` unless you are installing Rails system-wide and fully understand the implications. Instead, install Rails without `sudo`, using Bundler and rbenv.
 
 ### Why You Should Avoid sudo
 

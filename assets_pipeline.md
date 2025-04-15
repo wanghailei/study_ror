@@ -64,7 +64,28 @@ If your setup uses `jsbundling-rails` (ie, esbuild + tailwind), you will also ne
 
 You can configure your bundler options in the `build:css` script in `package.json` or via the installer-generated tailwind.config.js for Tailwind or postcss.config.js for PostCSS.
 
+## Don't @import or =require in application.css!
 
+
+
+In application.css, if there is `@import "fonts.css";`, the browser thought it needed to download `/assets/fonts.css` again inside the page. But Propshaft already expects `fonts.css` to be a separate asset, not a dependency. That mismatch → 404.
+
+In the old Sprockets, we used to do: `*= require fonts` or inside SCSS: `@import "fonts";`, because the pipeline compiled all files into one giant `application.css`.
+
+But with Propshaft, each CSS file is individually precompiled, and there is no need to `@import` inside CSS manually. Rails will find and auto-load `application.css`, `fonts.css` individually under `/assets`. In Propshaft, ==`application.css` is a first-class file, not a CSS entry point that needs to stitch others together with @`import`.==
+
+### Correct way in Propshaft Rails app
+
+Don't use application.css as an entrypoint file for other CSS files.
+
+Keep your application.css clean. **No @import needed** inside application.css.
+
+All your stylesheets (fonts.css, themes.css, etc.) are served separately, and Propshaft treats every file as its own deliverable asset.
+
+| Before (Sprockets style)** | **Now (Propshaft style)**      |
+| -------------------------- | ------------------------------ |
+| Use @import inside CSS     | No @import needed              |
+| Rails compiles everything  | Rails serves each CSS directly |
 
 ### Tailwind CSS
 

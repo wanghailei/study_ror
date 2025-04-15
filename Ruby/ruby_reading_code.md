@@ -80,3 +80,23 @@ The `&:even?` is shorthand for a block `{ |i| i.even? }`.
 
 Since `!` is used after `select`, it modifies the original array itself.
 
+
+
+## The `||=` Pattern
+
+The `||=` pattern is commonly used in Ruby to provide default values. It's particularly useful in callbacks because:
+
+1. It's non-destructive (won't overwrite a value that was intentionally set)
+2. It ensures the attribute is never nil
+3. It's concise and idiomatic Ruby
+
+This pattern is often used for timestamps, flags, and other attributes that should have sensible defaults but might occasionally need to be set explicitly.
+
+```ruby
+before_create { self.last_active_at ||= Time.now }
+```
+
+`||=`: The Ruby conditional assignment operator, which means "assign only if the left side is nil or false".
+
+This means: "Before creating a new session record, if the `last_active_at` attribute hasn't been set yet, set it to the current time."
+

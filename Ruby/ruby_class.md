@@ -29,15 +29,9 @@ Classes are named with constants.
 
 ### Learned from Xavier Noria&#x20;
 
-==The `class` and `module` keywords store classes and modules in constants.==
+In Ruby, a class or a module defined with the `class` or `module` keywords, are indeed ==stored as constants==. This is a unique aspect of Ruby's object model. For example, when you define `class MyClass; end`, ==`MyClass` is a constant that references the class object.==
 
-In Ruby, when you define a class or a module using the `class` or `module` keywords, they are indeed stored as constants. This is a unique aspect of Ruby's object model. For example, when you define `class MyClass; end`, `MyClass` is a constant that references the class object.
-
-==Constants belong to classes and modules.==
-
-Constants in Ruby are scoped within classes and modules. They are not global in the same sense as in some other languages. This means you can have different constants with the same name in different scopes without conflict. For instance, you could have `class A; MY_CONST = 1; end` and `class B; MY_CONST = 2; end` without any conflict between `A::MY_CONST` and `B::MY_CONST`.
-
-==Top-level constants belong to `Object.==
+==In Ruby, constants are scoped within classes and modules, and they are not global.== This means you can have different constants with the same name in different scopes without conflict. For instance, you could have `class A; MY_CONST = 1; end` and `class B; MY_CONST = 2; end` without any conflict between `A::MY_CONST` and `B::MY_CONST`.
 
 In Ruby, top-level constants (those defined outside of any class or module) are treated as if they belong to the `Object` class. This is because `Object` is the default object context of Ruby at the top level. This means that any constant defined at the top-level is accessible from anywhere in the program, as all classes in Ruby are descendants of `Object`.
 
@@ -60,51 +54,6 @@ The singleton class is a core aspect of Ruby's object-oriented design, which emp
 
 
 
-## `class << self`
-
-This syntax is used to define class methods within the block. It opens up the singleton class of the current class, allowing you to define methods that will be available on the class itself, rather than on instances of the class.
-
-Using the singleton class (`class << self`) to define class methods, groups them together makes the class more organised.
-
-```ruby
-class MyClass
-    class << self
-        def my_class_method
-            # method implementation
-        end
-    end
-end
-```
-
-A real-world code example from Rails:
-
-```ruby
-module ActiveRecord
-    class CurrentAttributes
-        class << self
-            def instance
-                current_instances[ current_instances_key ] ||= new
-            end
-            def attribute( *name )
-            end
-        end
-    end
-end
-
-```
-
-
-
-Using `self.` prefix, is another way, which is clear and concise, easy to read and understand.
-
-```ruby
-class MyClass
-    def self.my_class_method
-        # method implementation
-    end
-end
-```
-
 
 
 ## `subclass = Class.new(self)`
@@ -118,4 +67,32 @@ end
 This subclass inherits all the methods and properties of the original class but is a distinct class that can be modified independently.
 
 This is a way to dynamically create a new subclass of the current class. This technique is useful in scenarios where you need to create classes dynamically based on runtime conditions or for advanced metaprogramming patterns.
+
+
+
+## Why there is :: in the class name?
+
+```ruby
+class Room::MessagePusher
+end
+```
+
+In Ruby, the `::` notation is used for namespacing classes and modules.
+
+Here, `Room::MessagePusher` indicates that `MessagePusher` is a class that belongs to the `Room` namespace. This helps organize related classes together and prevents naming conflicts.
+
+This namespacing pattern is common in Rails applications to group related functionality. For example, this class specifically handles pushing messages for a Room, so it's logically placed within the Room namespace.
+
+
+
+
+
+## Instance Methods in Class Context
+
+You won't call an instance method inside its class body. Within the class body (outside of any method definition), you cannot directly call instance methods because:
+
+1. Instance methods require an instance (object) to operate on.
+2. In the class body, no instance exists yet.
+
+You **cannot** have an instance of a class available in the class body during definition, as the class itself is still being defined.
 

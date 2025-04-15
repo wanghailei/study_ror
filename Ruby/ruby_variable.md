@@ -2,11 +2,11 @@
 
 ## Variable 承值容器（可更换值的）
 
-\#AppleScript: Variables are what we use to store objects when we aren’t working with them. Think of a variable as a box. Whenever a script has an object that it will need to use again later, it can put it in this box for safe storage while it goes off and does other things. Later on, when it needs to use that object again, it can retrieve it just by finding the box it put it in earlier. To make these storage boxes easy to identify, each one has its own name, or identifier.
+AppleScript: Variables are what we use to store objects when we aren’t working with them. Think of a variable as a box. Whenever a script has an object that it will need to use again later, it can put it in this box for safe storage while it goes off and does other things. Later on, when it needs to use that object again, it can retrieve it just by finding the box it put it in earlier. To make these storage boxes easy to identify, each one has its own name, or identifier.
 
 WHL: If a variable is like container, say a bottle, I think, this bottle has two info on it: a name of the value, and a memory address of the value. Right?
 
-GitHub Copilot: Yes, you are correct. In most programming languages, including C and Ruby, a variable can be thought of as a container that holds a value in memory.
+GitHub Copilot: Yes, you are correct. ==In most programming languages, including C and Ruby, a variable can be thought of as a container that holds a value in memory.==
 
 So in your analogy, the bottle can be thought of as a container that holds a value, and it has two pieces of information associated with it: the name of the value (which is like the variable name), and the memory address where the value is stored (which is like the location of the bottle).
 
