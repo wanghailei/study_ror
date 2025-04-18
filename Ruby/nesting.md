@@ -1,10 +1,113 @@
-# Nesting in Modules, Classes and Blocks
+# Nesting
+
+代碼肯定需要被分組，也往往需要被嵌套，這個做設計時的 group 手法沒有區別。所謂 Namespacing 或 Nesting 其實就是 grouping，這一點都不神奇，尤其是在Ruby是非常直白的。一個class，放在一個module裡還是另一個class根本沒啥區別。
+
+==**Module is group.**== Period.
+
+## Ruby's Nesting and Design Philosophy
+
+Ruby's support for deep nesting, including structures like classes within classes, classes within modules, and modules within modules, is a significant aspect of its design, reflecting both practical and philosophical underpinnings.
+
+Unlike Java, which employs a package system for namespacing (e.g., com.ibm.lib.ent.core), ==Ruby lacks a separate package declaration. Instead, it uses modules for namespacing, and nesting is a key mechanism to achieve hierarchical organization.== 
+
+==Nesting in Ruby is not merely a response to the absence of packages but a deliberate feature==, as evidenced by its support for deep, complex hierarchies (e.g., class in module in class in module). This aligns with Ruby's emphasis on expressiveness, allowing developers to create code structures that feel natural and intuitive, as per Matz's vision.
+
+## Nesting vs Inline
 
 
 
+In a nested definition like `module Admin; class User; end; end`, Ruby is aware of the parent namespace (`Admin`), ensuring that constant lookup resolves `User` to `Admin::User`, not a top-level `User`. 
 
+In contrast, inline definitions (e.g., `class Admin::User`) treat the class as standalone, potentially leading to ambiguity. ==Nested definitions automatically create the outer module if undefined, while inline definitions require pre-definition to avoid `NameError`==, underscoring nesting's practical advantages for namespace management.
 
-## Nesting Modules Inside Modules
+```ruby
+module Admin
+    class Nested
+    	def self.test = User.name
+    end
+end
+
+class Admin::Inline
+	def self.test = User.name
+end
+
+Admin::Nested.test # => "Admin::User"
+Admin::Inline.test # => "User"
+```
+
+### Inheritance affected
+
+```ruby
+module Admin
+    class NestedController < BaseController
+    end
+end
+
+class Admin::InlineController < BaseController
+end
+
+Admin::NestedController.superclass # => Admin::BaseController
+Admin::InlineController.superclass # => BaseController
+```
+
+The reason for this behavior has to do with how constants, like class and module names, are defined and referenced in ruby.
+
+```ruby
+module Admin
+    class Nested
+    	def self.nesting = Module.nesting
+    end
+end
+
+class Admin::Inline
+	def self.nesting = Module.nesting
+end
+
+Admin::Nested.nesting # => [Admin::Nested, Admin]
+Admin::Inline.nesting # => [Admin::Inline]
+```
+
+For the nested class, the interpreter is aware that the `Admin::Nested` constant is defined within an `Admin` namespace. Whereas with the inline class, the interpreter considers the `Admin::Inline` class to just be on its own.
+
+Therefore, in the example above, the inline module returned `User` instead of `Admin::User`. When the interpreter is looking for `User`, it starts in the current namespace (`Admin::Inline::User`), then it walks up the nesting tree until encountered it. Since the interpreter does not consider the inline class to be nested in `Admin`, it doesn’t look for `User` in that namespace at all, and rather just goes straight to the top-level `User`.
+
+### The outer module
+
+The other difference between inline and nested module definitions is how the outer module is created. 
+
+```ruby
+class One::Two
+end
+```
+
+I’d get this error: `uninitialized constant One (NameError)` . This is because of attempting to reference the `One` constant before it’s defined.
+
+### Conclusion
+
+The choice between nested and inline definitions has practical implications. Nested definitions are preferred for enhancing clarity and reducing errors. ==**Just use nesting!**==
+
+## ::
+
+In Ruby, the double colon (`::`) is used to:
+
+1. Access constants, classes, or modules within a namespace
+2. Access the top-level namespace, which is what's happening here
+
+```ruby
+case value
+when ::Float
+	convert_float_to_big_decimal(value)
+when ::Numeric
+	BigDecimal(value, precision || BIGDECIMAL_PRECISION)
+else
+end
+```
+
+The `::` in `when ::Float` is ==the namespace resolution operator== in Ruby, and it's used to ensure that Ruby references the top-level `Float` class. By using `::Float` instead of just `Float`, the code explicitly references the Ruby core `Float` class rather than potentially a different `Float` class that might be defined in the current namespace.
+
+In the context of the `ActiveModel` type system, which deals with various data types that might share names with Ruby core classes, this explicit namespace resolution helps prevent subtle bugs that could occur if there were naming conflicts.
+
+## Nesting Modules in Module
 
 ### 1. Namespace Organization
 
@@ -112,7 +215,7 @@ module ActiveJob
 end
 ```
 
-## 4. Access Control
+### 4. Access Control
 
 Nested modules allow you to control visibility and provide clear public interfaces while hiding implementation details.
 
@@ -146,7 +249,7 @@ all_tables = connection.tables  # Calls the public method
 # connection.mapping_for(12345)  # Would raise NoMethodError
 ```
 
-## 5. Modularity and Maintainability
+### 5. Modularity and Maintainability
 
 Nested modules enhance separation of concerns, improve testability, and simplify documentation by organizing code into focused, logical units.
 
@@ -194,7 +297,7 @@ Rails.application.routes.draw do
 end
 ```
 
-## 6. Progressive Disclosure
+### 6. Progressive Disclosure
 
 Nested modules present complex systems incrementally and make code navigation more intuitive by following a "drill-down" mental model.
 
@@ -237,7 +340,7 @@ stack = Rails::Configuration::ActionDispatch.build_stack(app)
 
 These examples from Rails demonstrate how nested modules create a well-organized, maintainable codebase by providing clear structure and separation of concerns, even in a large and complex framework.
 
-## Nesting Classes in Modules
+## Nesting Classes in Module
 
 Why Nest Classes in Modules? Classes are nested in modules primarily for namespace organization and logical grouping.
 
@@ -283,34 +386,22 @@ module API
 end
 ```
 
-Classes in the module can share module-level configurations and constants.
+==Classes in the module can share module-level configurations and constants.==
 
+### Inherit from a class in the same moduel
 
-
-### Example
-
-
-
-In the code snippet:
+`AssociationRelation` is a class defined within the `ActiveRecord` module. `AssociationRelation` inherits from `Relation`.
 
 ```ruby
 module ActiveRecord
 	class AssociationRelation < Relation 
 ```
 
-This indicates that:
-
-1. `AssociationRelation` is a class defined within the `ActiveRecord` module.
-2. `AssociationRelation` inherits from `Relation`.
-
-In this case, for the code to work properly, `Relation` is expected to be found within the same namespace - the `ActiveRecord` module.
+==For the code to work properly, `Relation` is expected to be found within the same namespace - the `ActiveRecord` module.==
 
 ```ruby
 module ActiveRecord
 	class Relation
-    	# ...
-	end
-end
 ```
 
 In the actual Rails codebase, this is indeed the case. `ActiveRecord::Relation` is defined in the ActiveRecord module and serves as the base class for different types of relations in ActiveRecord, including `AssociationRelation`.
@@ -327,7 +418,13 @@ module ActiveRecord
 
 The absence of any namespace prefix in the original code confirms that `Relation` is expected to be found within the `ActiveRecord` module.
 
-## Why Nest Modules in Classes?
+```ruby
+# Rails
+module ActionController
+	class Railtie < Rails::Railtie
+```
+
+## Nesting Modules in Classes?
 
 Modules are nested in classes to organize behaviors, create namespaces for class utilities, and provide encapsulation.
 
@@ -351,68 +448,93 @@ end
 
 This organizes related methods into logical groups while keeping them within the class's namespace.
 
-#### Class-Specific Utilities
+#### 1. Class-Specific Utilities
 
 ```ruby
 class ActiveRecord::Base
-  module QueryMethods
-    def where(conditions)
-      # Query implementation
+    module QueryMethods
+        def where(conditions)
+        	# Query implementation
+        end
     end
-  end
-  
-  extend QueryMethods
+
+    extend QueryMethods
 end
 ```
 
 The module contains functionality specifically relevant to the class, making the relationship explicit.
 
-1. **Internal Implementation Details**
+#### 2. Internal Implementation Details
 
-	```ruby
-	class ApplicationController < ActionController::Base
-	  module RescueHandlers
-	    private
-	    def handle_record_not_found
-	      render "errors/not_found", status: :not_found
-	    end
-	  end
-	  
-	  include RescueHandlers
-	  
-	  rescue_from ActiveRecord::RecordNotFound, with: :handle_record_not_found
-	end
-	```
+```ruby
+class ApplicationController < ActionController::Base
+    module RescueHandlers
+        private
+        def handle_record_not_found
+        	render "errors/not_found", status: :not_found
+        end
+    end
 
-	This pattern keeps implementation details organized but contained within the class's conceptual boundary.
+    include RescueHandlers
 
-2. **Testing Support**
+    rescue_from ActiveRecord::RecordNotFound, with: :handle_record_not_found
+end
+```
 
-	```ruby
-	class User < ApplicationRecord
-	  module TestHelpers
-	    def self.create_sample
-	      User.create(email: "test@example.com", name: "Test User")
-	    end
-	  end
-	end
-	
-	# In test:
-	sample = User::TestHelpers.create_sample
-	```
+This pattern keeps implementation details organized but contained within the class's conceptual boundary.
 
-	Provides testing utilities that are directly related to the class but grouped separately.
+#### 3. Testing Support
+
+```ruby
+class User < ApplicationRecord
+    module TestHelpers
+        def self.create_sample
+        	User.create(email: "test@example.com", name: "Test User")
+        end
+    end
+end
+
+# In test:
+sample = User::TestHelpers.create_sample
+```
+
+==Provides testing utilities that are directly related to the class but grouped separately.==
 
 These nesting patterns help organize code along logical boundaries while making relationships explicit, improving both code organization and developer understanding of the system structure.
 
 
 Is it a good practice do multiple levels of module in class in module in class?
 
+## Nesting Classes in Class
+
+Classes are constants in Ruby, and nested classes live in the namespace of their parent, which helps prevent naming conflicts without requiring separate files. ==Nested classes are often used as a lighter alternative to modules for organization.== Logically grouping classes that only make sense in the context of another class, makes code more readable and self-documenting.
+
+Be noted that, ==in Ruby, nested classes don't have implicit access to the outer class's instance variables.==
+
+```ruby
+class Order
+    # Customer only exists in the context of Order
+    class Customer
+        attr_reader :name, :address
+
+        def initialize(name, address)
+            @name = name
+            @address = address
+        end
+    end
+
+    def initialize(customer_name, address)
+    	@customer = Customer.new(customer_name, address)
+    end
+end
+
+# Access using namespace operator
+order_customer = Order::Customer.new("Ruby Fan", "123 Rails St")
+```
+
 ## Multiple Levels of Nesting: Module in Class in Module in Class
 
-Is it Good Practice? 
-
-While Ruby supports unlimited nesting of modules and classes, deeply nested structures (more than 2-3 levels) generally present more challenges than benefits.
+Is it Good Practice? While Ruby supports unlimited nesting of modules and classes, deeply nested structures (more than 2-3 levels) generally present more challenges than benefits.
 
 ### Potential Problems
 
@@ -541,13 +663,42 @@ While technically possible, deep nesting (beyond 2-3 levels) should be avoided i
 
 The most maintainable code typically avoids excessive nesting in favor of clear, modular designs with explicit relationships.
 
+## Class Nesting vs Module
 
+==In Ruby, both classes and modules serve as containers for constants. A nested class is just a constant defined within the outer class or module.== They both provide the same namespace resolution with the `::` operator. Therefore, ==nesting a class inside another class is nearly identical to nesting it inside a module from a namespacing perspective.==
+
+```ruby
+# Nesting in a class
+class Order
+    class LineItem
+    end
+end
+
+# Nesting in a module
+module Order
+    class LineItem
+    end
+end
+
+# Both are accessed the same way
+Order::LineItem.new
+```
+
+### Minor Differences
+
+The main difference is conceptual rather than technical. **Modules** typically represent collections of behavior or namespaces. **Classes** typically represent entities that can be instantiated. The outer class is an instantiable entity with its own behavior. When you nest a class inside another class, you're implying a logical "belongs to" relationship. Consider modules for broader categories and class nesting for tighter relationships.
+
+### Ruby Community Practice
+
+Use modules for pure namespacing, when you don't need instances.
+
+Use class nesting when there's a strong conceptual relationship.
 
 ## Nested Blocks
 
 ==Nested blocks help create more maintainable, organized, and expressive code by establishing clear relationships between different parts of your program.== Nested blocks in Ruby serve several important purposes:
 
-### 1. Scope Management
+#### 1. Scope Management
 
 - Create isolated lexical scopes
 - Control variable visibility
@@ -567,7 +718,7 @@ The most maintainable code typically avoids excessive nesting in favor of clear,
 end
 ```
 
-### 2. Context Setting
+#### 2. Context Setting
 
 - Set up a specific context for a subset of operations
 - Apply shared settings to a group of related operations
@@ -590,7 +741,7 @@ end
 
 
 
-### 3. Code Organization
+#### 3. Code Organization
 
 - Group related functionality together
 - Improve readability by creating logical hierarchies

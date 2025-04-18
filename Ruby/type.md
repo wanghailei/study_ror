@@ -1,5 +1,7 @@
 # Type
 
+There is no type in Ruby. Period.
+
 ## Ruby's Approach to Types
 
 Ruby is a dynamically typed language, meaning that it does not require or enforce type annotations in its syntax. Variables in Ruby can hold references to objects of any type, and the type of a variable can change over its lifetime. This provides a great deal of flexibility and is a hallmark of Ruby's design philosophy, focusing on simplicity and productivity.

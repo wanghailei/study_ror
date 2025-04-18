@@ -149,7 +149,7 @@ rbenv uninstall 3.4.0
 
 ## RubyGems
 
-RubyGems is a package management framework for Ruby. Commonly gems are used to distribute **reusable functionality** that is shared with other Rubyists for use in their applications and libraries. RubyGems的存在主要是為了分享。
+RubyGems is a package management framework for Ruby. Commonly gems are used to distribute **reusable functionality** that is shared with other Rubyists for use in their applications and libraries. ==RubyGems的存在主要是為了分享。==
 
 The RubyGems software allows you to easily download, install, and use ruby software packages on your system. The software package is called ==a “gem” which contains a packaged Ruby application or library.==
 
@@ -257,9 +257,7 @@ Then, Bundler downloads and installs those gems, as well as any other gems neede
 
 It will require them while booting.
 
-After the gems have been installed, Bundler can help you update them when new versions become available. Bundler is also an easy way to create new gems.&#x20;
-
-
+After the gems have been installed, Bundler can help you update them when new versions become available. Bundler is also an easy way to create new gems.
 
 
 

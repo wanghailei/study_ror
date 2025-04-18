@@ -9,7 +9,7 @@ It consists of several modules:
 * **Action Dispatch**, which parses information about the web request, handles routing as defined by the user, and does advanced processing related to HTTP such as MIME-type negotiation, decoding parameters in POST, PATCH, or PUT bodies, handling HTTP caching logic, cookies and sessions.
 * **Action Controlle**r, which provides a base controller class that can be subclassed to implement filters and actions to handle requests. ==The result of an action is typically content generated from views.==
 
-Rails users only directly interface with the Action Controller module. Necessary Action Dispatch functionality is activated by default and Action View rendering is implicitly triggered by Action Controller.
+==Rails users only directly interface with the Action Controller module.== Necessary Action Dispatch functionality is activated by default and Action View rendering is implicitly triggered by Action Controller.
 
 ## `AbstractController`
 

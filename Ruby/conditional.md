@@ -122,3 +122,44 @@ Rails also has `try!` which is similar to `try` but only protects against nil, n
 - `nil.try(:nonexistent_method)` returns nil
 - `object.try(:nonexistent_method)` returns nil
 - `object.try!(:nonexistent_method)` raises NoMethodError
+
+
+
+
+
+## Never use elsif because it's ugly.
+
+```ruby
+if
+    #
+else
+    #
+end
+
+# OR ONLY
+
+if
+    #
+else
+    if
+        #
+    else
+        #
+    end
+end
+```
+
+Another solution is case...when
+
+```ruby
+grade = 
+case score
+when 90..100 then 
+    "A"
+when 80..89 then 
+    "B"
+else 
+    "F"
+end
+```
+

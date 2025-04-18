@@ -116,6 +116,80 @@ end
 
 This approach makes modules more powerful and expressive while maintaining clean syntax.
 
+
+
+## `class << self`
+
+This syntax is used to define **class methods** within the block. It opens up the singleton class of the current class, allowing you to define methods that will be available on the class itself, rather than on instances of the class.
+
+Using the singleton class (`class << self`) to define class methods, groups them together makes the class more organised.
+
+```ruby
+class MyClass
+    class << self
+        def my_class_method
+            # method implementation
+        end
+    end
+end
+```
+
+A real-world code example from Rails:
+
+```ruby
+module ActiveRecord
+    class CurrentAttributes
+        class << self
+            def instance
+                current_instances[ current_instances_key ] ||= new
+            end
+            def attribute( *name )
+            end
+        end
+    end
+end
+
+```
+
+Using `self.` prefix, is another way, which is clear and concise, easy to read and understand.
+
+```ruby
+class MyClass
+    def self.my_class_method
+        # method implementation
+    end
+end
+```
+
+#### `class << self` opens a class definition block, where all class methods defined inside.
+
+
+
+```ruby
+# will become class methods rather than instance methods
+# This is equivalent to writing "def self.method_name"
+class << self
+
+	def create_for(attributes, users:)
+		transaction do
+			create!(attributes).tap do |room|
+				room.memberships.grant_to users
+			end
+		end
+	end
+
+	def original
+		order(:created_at).first
+	end
+end
+```
+
+
+
+Let's talk more about class methods in Ruby. What is its essential purpose for existing? What if there is no class method in Ruby? 
+
+Can you define a class inside a method/action?
+
 ## Methods in Modules vs. Class Methods
 
 ==IMHO, utility methods do should be put inside modules instead of classes.==
@@ -536,3 +610,21 @@ end
 ```
 
 The `self` prefix is not technically required when calling one class method from another, but it's a common style convention in ActiveRecord and helps with readability.
+
+
+
+## Class methods have feel of the functions in functional languages
+
+我不應該混合討論不同的編程語言模式，這沒啥意義。我只是想紀錄下一點感受。
+
+Class methods do share some similarities with functions in functional programming. They can be called without instantiating an object - Similar to standalone functions in functional languages. 
+
+```ruby
+ActionController::Renderer.normalize_env(env)  # Class method call
+PostsController.render :show, assigns: { post: Post.first } 
+```
+
+However, there are also some important distinctions:
+
+1. **Class methods are still associated with a class** - They're not truly standalone functions like in functional languages. They're namespaced under their class and have access to class variables/constants.
+2. **Class methods can have side effects** - While functional programming emphasizes pure functions without side effects, Ruby's class methods can modify class variables or external state. Although good class methods, often don't depend on changing instance state - stateless.

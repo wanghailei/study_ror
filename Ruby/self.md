@@ -204,3 +204,33 @@ end
 
 This is a classic example of Ruby's inheritance model and method resolution.
 
+
+
+
+
+<< self and < self
+
+In `ActiveSupport::Concern`'s `append_features` method, there are two intersting usage of `self`. `self` here refers to the `Concern` module.
+
+```ruby
+# ActiveSupport::Concern
+
+def append_features(base) # :nodoc:
+	if base.instance_variable_defined?(:@_dependencies)
+        base.instance_variable_get(:@_dependencies) << self
+        false
+    else
+        return false if base < self
+        @_dependencies.each { |dep| base.include(dep) }
+        super
+        base.extend const_get(:ClassMethods) if const_defined?(:ClassMethods)
+        base.class_eval(&@_included_block) if instance_variable_defined?(:@_included_block)
+    end
+end
+```
+
+The `<<` operator is the 'append' or 'shovel' operator in Ruby. Here it adds the current module (`self`) to the `base`'s `@_dependencies` array. This tracks that the `base` module depends on this `concern`.
+
+The < operator 
+
+The `<` operator checks if `base` is a subclass of or includes `self` (the `concern` module). This prevents circular inclusion by returning `false` if the base already inherits from this module.

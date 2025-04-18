@@ -83,10 +83,6 @@ Here, `Room::MessagePusher` indicates that `MessagePusher` is a class that belon
 
 This namespacing pattern is common in Rails applications to group related functionality. For example, this class specifically handles pushing messages for a Room, so it's logically placed within the Room namespace.
 
-
-
-
-
 ## Instance Methods in Class Context
 
 You won't call an instance method inside its class body. Within the class body (outside of any method definition), you cannot directly call instance methods because:
@@ -95,4 +91,113 @@ You won't call an instance method inside its class body. Within the class body (
 2. In the class body, no instance exists yet.
 
 You **cannot** have an instance of a class available in the class body during definition, as the class itself is still being defined.
+
+
+
+## Defining a Class Inside a Method
+
+You can define a class inside a method in Ruby. This creates a class dynamically when the method runs, with the class typically scoped to where the method makes it available.
+
+You can use the `class` keyword inside a method:
+
+```ruby
+def create_named_class
+    class TemporaryClass
+        def perform_action
+        	puts "Action performed!"
+        end
+    end
+
+	return TemporaryClass # Return the class reference.
+end
+
+an_obj.perform_action  # Outputs: Action performed!
+TemporaryClass.new  # This would raise an error if called directly
+```
+
+Alternative Syntax:
+
+```ruby
+def create_custom_class(name)
+    Class.new do
+        attr_accessor :custom_name
+
+        def initialize(custom_name = nil)
+        	@custom_name = custom_name || name
+        end
+        def greet
+        	puts "Hello from #{@custom_name}!"
+        end
+    end
+end
+
+# Create different classes dynamically
+PersonClass = create_custom_class("Person")
+RobotClass = create_custom_class("Robot")
+
+# Use the dynamically created classes
+person = PersonClass.new
+robot = RobotClass.new("Mechanical Friend")
+
+person.greet  # Outputs: Hello from Person!
+robot.greet   # Outputs: Hello from Mechanical Friend!
+```
+
+### Technical Details
+
+When defining a class in a method, the class is created when the method executes. ==The class is defined in the current lexical scope, not available outside unless returned or stored.==
+
+Each call to the method creates a new class, with the same name. Classes created with the same name in different method calls are different classes.
+
+This technique, the Factory pattern, enables generating specialized classes with varying attributes and methods, based on parameters, for specific contexts or runtime settings.
+
+The following example demonstrates how Ruby's metaprogramming capabilities allow you to dynamically create classes with custom attributes and methods within method scope.
+
+```ruby
+def build_entity_class(type, attributes, methods)
+    Class.new do
+        # Set up the elements
+        attributes.each do |attribute_name|
+        	attr_accessor attribute_name
+        end
+
+        # Initialize with the attributes
+        define_method :initialize do |values = {}|
+            @type = type
+            attributes.each do |attribute_name|
+            	instance_variable_set("@#{attribute_name}", values[attribute_name])
+            end
+        end
+
+        # Add the methods
+        methods.each do |method_name, implementation|
+        	define_method method_name, &implementation
+        end
+
+        # Add a helper method
+        define_method :describe do
+            puts "I am a #{@type} with these attributes:"
+            attributes.each do |element_name|
+                value = instance_variable_get("@#{attribute_name}")
+                puts "  #{attribute_name}: #{value}"
+            end
+        end
+    end
+end
+
+# Use the method to create dynamic classes
+hero_attributes = [:name, :strength, :health]
+hero_methods = {
+    attack: ->(target) { puts "#{@name} attacks #{target} with #{@strength} power!" },
+    heal: -> { @health += 10; puts "#{@name} healed to #{@health} health!" }
+}
+
+HeroClass = build_entity_class("Hero", hero_attributes, hero_methods)
+
+# Create an instance
+hero = HeroClass.new(name: "Aragorn", strength: 95, health: 100)
+hero.describe
+hero.attack("Orc")
+hero.heal
+```
 

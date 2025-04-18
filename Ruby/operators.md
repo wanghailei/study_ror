@@ -7,49 +7,42 @@ Ruby enables several elegant return patterns, which reflects Ruby's design philo
 
 This is why many Ruby developers find the language so expressive - it lets you write code that reads almost like natural language while still being precise and powerful.
 
-## The `||=` so-fucking-called Memoization pattern
+% Pattern 應該被翻譯成「方式」或「用法」。其實很簡單的事兒，搞了個不明覺厲的傻逼概念。 %
 
+## The `||=` ~~so-fucking-called Memoization~~ pattern 有就不給了
 
+The conditional assignment operator (`||=`) means "assign only if the left side is nil or false". It is commonly used to provide default values, to ensures the attribute is never `nil`.
+
+```ruby
+before_create { self.last_active_at ||= Time.now }
+```
+
+This means: "Before creating a new session record, if the `last_active_at` attribute hasn't been set yet, set it to the current time."
 
 ```ruby
 def expensive_calculation
 	@result ||= calculate_result
 end
-
-private
-
-def calculate_result
-    # Complex calculation that takes time
-    sleep(1) # Simulating expensive work
-    42
-end
 ```
 
-The method checks if `@result` is already set (not `nil` or `false`). If set, return its value without performing the calculation. If not set, execute the calculation and store the result in `@result`, and return the newly calculated value.
+==The method checks if `@result` is already set (not `nil` or `false`). If set, return its value without performing the calculation. If not set, execute the calculation and store the result in `@result`, and return the newly calculated value.==
 
-Thanks to short-circuit evaluation, if `@result` is truthy (not `nil` or `false`), the right side (`calculate_result`) is never executed. 
+Behind the Scenes, the expression `@result ||= calculate_result` is syntactic sugar for `@result = @result || calculate_result`. ==Technically, at its core, the `||=` pattern is indeed just assigning a value to a variable if it doesn't already exist.==
 
-Behind the Scenes, the expression `@result ||= calculate_result` is syntactic sugar for:
+At the end of the day, to me, it's just a way of assigning an object to a variable if it doesn't already exist, namely **default assignment** or conditional assignment.
 
-```ruby
-@result = @result || calculate_result
-```
+### The true value of this pattern
 
-And this pattern has a bullshit acadamical name callde the Memoization pattern. 
+If left side is truthy (not `nil` or `false`), the right side is never executed. 如果杯子裡有水就不用添了。
 
-```ruby
-# Memoization pattern # Fuck you!
-@calculated_value ||= expensive_calculation
-```
+This is why it's called memoization or caching mechanism？The term "memoization" is a bullshit jardon originally comes from "memo" (as in memorandum or reminder) from computer science. It has a specific meaning - ==storing the results of expensive function calls and returning the cached result when the same inputs occur again==, to avoid redundant calculations and improve performance.
 
-It's actually just default assignment.
+### There are many examples in the real world.
 
 ```ruby
 # Default value pattern # That's human's words.
 options ||= {}
 ```
-
-There are many examples in the real world.
 
 ```ruby
 #  Method Results Caching. # Cache my ass.
@@ -57,8 +50,6 @@ def user_privileges
 	@user_privileges ||= calculate_user_privileges
 end
 ```
-
-
 
 ```ruby
 # Lazy Initialization # Fuck you!
@@ -69,16 +60,12 @@ class ShoppingCart
 end
 ```
 
-
-
 ```ruby
 # Common pattern in Rails views
 def current_user_greeting
 	@current_user_greeting ||= "Hello, #{current_user.name}!"
 end
 ```
-
-
 
 ```ruby
 # Puma
@@ -98,8 +85,6 @@ def self.abstract_unix_socket?
 end
 ```
 
-
-
 ```ruby
 # Memoization with Arguments Pattern
 def calculate(input)
@@ -108,16 +93,12 @@ def calculate(input)
 end
 ```
 
-
-
 ```ruby
 #  Class-Level Memoization
 def self.system_config
 	@@system_config ||= load_system_config
 end
 ```
-
-
 
 ```ruby
 # Rails' dedicated `memoize` helper method.
@@ -128,16 +109,6 @@ class User < ApplicationRecord
     memoize :complex_stats
 end
 ```
-
-### Why is it called the Memoization pattern or caching mechanism？
-
-To me, it's just a way to assign an object to a variable if it doesn't already exist. ==Technically, at its core, the `||=` pattern is indeed just assigning a value to a variable if it doesn't already exist.== At the end of the day, it's exactly as you describe - a conditional assignment that happens to be extremely useful for avoiding redundant work.
-
-Why It's Called "Memoization"? The term "memoization" comes from computer science and has a specific meaning. The jardon originally comes from "memo" (as in memorandum or reminder). It refers to ==storing the results of expensive function calls and returning the cached result when the same inputs occur again.== The purpose is to avoid redundant calculations and improve performance.
-
-% ==I believe they are just bullshit jargon.== 這就像在日常說話中提出「我這句話是一個定語從句」般地傻逼。 %
-
-The terminology around it, like memoization, can seem unnecessarily complex. Many Ruby patterns have academic-sounding names that can obscure their simplicity.  A straightforward description actually helps demystify the concept.
 
 ### Gotchas and Edge Cases
 
@@ -247,8 +218,6 @@ else
 end
 ```
 
-
-
 ## The inheritance indicator (`<`)
 
 These are two different uses of the same symbol "`<`" - the implementation as an inheritance indicator is part of Ruby's syntax, while ==the comparison operator is a method==.
@@ -274,4 +243,23 @@ end
 User < Person # => This express returns true.
 ```
 
-##
+
+
+## The `&` operator
+
+`[2, 4, 6].select!( &:even? )` is equivalent to `[2, 4, 6].select! { |i| i.even? }`
+
+The `&:even?` is shorthand for a block `{ |i| i.even? }`.
+
+`:even?` is a method that returns `true` if an integer is even and `false` otherwise. The colon `:` before `even?` indicates that it is a symbol, namely, ==the `:` before `even?` converts the name of the method into a symbol.== So, `:even?` represents the symbol form of method `even?`. The `even?` is an instance method of the `Integer` class.
+
+The ampersand (`&`) is a unary operator that converts the symbol to a block. When used in front of a symbol in a method call like this, it tries to call a method with the same name as the symbol on the objects being iterated over. 
+
+==The `&` operator is used to convert the symbol `:even?` into a Proc object==, which is then treated as a block by the method it's passed to, and which is then passed to the `select!` method. In this case, it's calling `even?` on each element of the array.
+
+Since `!` is used after `select`, it modifies the original array itself.
+
+
+
+
+
