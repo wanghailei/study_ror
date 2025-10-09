@@ -4,15 +4,15 @@ Action View encapsulates all the functionality needed to render templates, most 
 
 ## Templates
 
-The `render` method expects to find templates in the app/views directory of the current application.
+The `render` method expects to find templates in the `app/views` directory of the current application.
 
 Within this directory, the convention is to have a separate subdirectory for the views of each controller. Each subdirectory typically contains templates named after the actions in the corresponding controller.
 
 Templates contain a mixture of fixed text and code. The code in the template adds dynamic content to the response. That code runs in an environment that gives it access to the information set up by the controller:
 
-All instance variables of the controller are also available in the template. This is how actions communicate data to the templates.
+==All instance variables of the controller are also available in the template.== This is how actions communicate data to the templates.
 
-The path to the base directory of the templates is stored in the attribute base_path.
+The path to the base directory of the templates is stored in the attribute `base_path`.
 
 Jbuilder templates generate JSON responses.
 
@@ -27,11 +27,6 @@ The way to get the most of Rails’ design without creating a problem is to adop
 - ==Expose exactly one instance variable from any given action, ideally named for the resource or resources being manipulated by the route to that action.== For example, the `widget` `show` page should only expose `@widget`. ==The key situation to avoid is exposing multiple instance variables that collectively represent the resource rather than creating a single instance variable (and perhaps a new model class) to do so.==
 
 - There are there exceptions: when a view requires access to reference data, like a list of country codes, when the view needs access to global context, like the currently logged-in user, or when there is UI state that is persisted across page refreshes, such as the currently selected tab in a tab navigation control.
-
-	
-
-
-
 
 
 ## Layout

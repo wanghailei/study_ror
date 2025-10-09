@@ -1,5 +1,13 @@
 # The Mindset or Mental Model of Understanding and Using a Programming Language
 
+#### 20250419
+
+我認為寫程序，並不應該首先考慮別人能否讀得懂，而是首先根據自己的喜好寫出好的程序來。別人能否看動，那是他的事兒。炫技肯定是傻逼；但沒有必要藏鋒。
+
+
+
+
+
 
 
 我學習的第一種編程語言是 Java。當時讀得最多的一本書是 Thinking in Java。現在想來，這本書的名字起的超棒！如果能用一種語言思考，那就證明你真的掌握了這門語言，無論它是英語、種文還是Java。學習Java語言，讓我建立了 OO 的 mental model。但是 Java 這種語言不夠好，因為它不足夠 OO，不如 Ruby OO。體現在Java還有所謂的 primitive types，這雖然讓我當時記住了，但是我並不知道其實OO可以像 Ruby那樣，numbers、strings、booleans 都可以是一個個 object，而不是什麼所謂的 primitive types。

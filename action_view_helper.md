@@ -1,14 +1,14 @@
 # Action View Helper
 
-A helper is simply a module containing methods that assist a view. A helper extends the behavior of a template. Helper methods are output-centric, and they exist to generate HTML (or XML, or JavaScript).
+A helper is simply a module containing methods that assist a view. A helper extends the behavior of a template. ==Helper methods are output-centric, and they exist to generate HTML (or XML, or JavaScript).==
 
 It’s always a good practice to use Rails helpers where they’re appropriate, even if it seems just as easy to hard-code the output you want.
 
 While all view helpers are available to all controllers, it’s often good practice to organize helpers. ==By default, each controller gets its own helper module.==
 
-### ``link_to``
+## ``link_to``
 
-link_to creates a hyperlink to another action in your application.
+link_to creates ==a hyperlink to another action== in your application.
 
 ```ruby
 <%= link_to "Add Product", new_products_path %>
@@ -23,9 +23,9 @@ The most commonly used one is the `:confirm` option, which takes a short message
 <%= link_to "Delete", product_path(@product), method: :delete, data: { confirm: 'Are you sure?' } %>
 ```
 
-`link_to_if` and `link_to_unless` take a condition parameter, followed by the regular parameters to link_to. If the condition is true for `link_to_if` or false for `link_to_unless`, a regular link will be created using the remaining parameters. If not, the name will be added as plain text with no hyperlink.
+`link_to_if` and `link_to_unless` take a condition parameter, followed by the regular parameters to `link_to`. If the condition is true for `link_to_if` or false for `link_to_unless`, a regular link will be created using the remaining parameters. If not, the name will be added as plain text with no hyperlink.
 
-#### `link_to_unless_current`
+### `link_to_unless_current`
 
 The `link_to_unless_current` helper creates menus in sidebars where the current page name is shown as plain text and the other entries are hyperlinks:
 
@@ -39,69 +39,38 @@ The `link_to_unless_current` helper may also be passed a block that’s evaluate
 
 The `button_to` method works the same as link_to but generates a button in a self-contained form rather than a straight hyperlink.
 
-#### `link_to image_tag`
+### `link_to image_tag`
 
 ```ruby
 <%= link_to( image_tag("delete.png", size: "50x22"), product_path(@product), 
-	data: { confirm: "Are you sure?" }, method: :delete ) %>
+	method: :delete ), data: { confirm: "Are you sure?" } %>
 ```
 
-
-
-## form\_with
-
-`form_with()` sets up a Ruby block environment, within which, the block’s parameter `f` is used to reference a `form` context.
-
-Before form\_with was introduced in Rails 5.1, its functionality used to be split between form\_tag and form\_for. Both are now soft-deprecated.
-
-### `form_with model:` Binding a Form to an Object
-
-==The `form_with model:` helper sets up an HTML form that knows about Rails routes and models.==
-
-```ruby
-<%= form_with model: @order do |f| %>
-    <%= f.label :name, "Name:" %>
-    <%= f.text_field :name, size: 40 %>
-<% end %>
-```
-
-The `:model` argument of `form_with` binds the form builder object to a model object. This association means that: 1) the form will be scoped to that model object, 2)the form's fields will be populated with values from that model object, and 3) submitting the form will set the right names and values in the data available to the controller.
-
-### form\_with and RESTful resources
-
-When dealing with RESTful resources, calls to `form_with` can get significantly easier if you rely on record identification. In short, you can just pass ==the model instance== and have Rails figure out model name and the rest.
-
-The long and short style of editing an existing article have the same outcome:
-
-```ruby
-# long-style:
-form_with( model: @article, url: article_path(@article), method: "patch" )
-
-# short-style:
-form_with( model: @article )
-```
-
-### Parameter Naming Conventions
-
-Values from forms can be at the top level of the `params` hash or nested in another hash. For example, in a standard `create` action for a `Person` model, `params[:person]` would usually be a hash of all the attributes for the person to create. The `params` hash can also contain arrays, arrays of hashes, and so on.
-
-Fundamentally HTML forms don't know about any sort of structured data, all they generate is name-value pairs, where pairs are just plain strings. The arrays and hashes you see in your application are the result of some parameter naming conventions that Rails uses.
-
-### `<%= javascript_importmap_tags %>`
-
-The `javascript_importmap_tags` method produces a list JavaScript filenames (assumed to live in app/javascript) which enables these resources to be imported by your application.
-
-### `stylesheet_link_tag`
-
-<%= stylesheet_link_tag "inter-font", "data-turbo-track": "reload" %>
-
-<%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>”
-
-By default, image and style sheet assets are assumed to live in the `images` and `stylesheets` directories relative to the application’s `assets` directory.
+## `button_to`
 
 
 
-### capture
+Use `button_to` when you want to create a button that submits to a URL, outside of any existing form. ==It creates its own `form` tag.== It's used for generating a new, standalone `<form>`. ==It does not work with form_with, neither automatically binds model data.==
+
+==Use `f.submit` when you’re inside a `form` block.==
+
+所以，不要試圖去修改 `ActionView::Helpers::FormTagHelper#submit_tag`。
+
+## javascript_importmap_tags`
+
+The `javascript_importmap_tags` method produces a list JavaScript filenames (assumed to live in `app/javascript`) which enables these resources to be imported by your application.
+
+## `stylesheet_link_tag`
+
+`<%= stylesheet_link_tag "inter-font", "data-turbo-track": "reload" %>`
+
+`<%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>”`
+
+By default, image and style sheet assets are assumed to live in the `app/assets/images` and `app/assets/stylesheets` directories.
+
+
+
+## capture
 
 In Rails, the `capture` method is a helper that takes a block, executes it, and returns the generated output as a string.
 
@@ -113,7 +82,7 @@ In Rails, the `capture` method is a helper that takes a block, executes it, and 
 
 Once captured, the content is stored in `@greeting`. You can then output it later in your view using `<%= @greeting %>`. This pattern is particularly useful when you want to build reusable view components or delay rendering.
 
-#### how is it possible that the `capture` method being used "globally" in an app without an object?
+### How come `capture` work globally in an app without an object?
 
 In Rails, helper methods like `capture` are defined as instance methods within modules (such as `ActionView::Helpers::CaptureHelper`) that are mixed into the view context. ==When a view is rendered, it’s evaluated in the context of an instance of `ActionView::Base`==, which includes these helper modules. This makes methods like `capture` available “globally” within views without needing an explicit receiver.
 
@@ -126,3 +95,46 @@ To summarize:
 **Implicit Receiver**: When you call capture in a view, Ruby looks it up in the current object (the view instance) and finds it there.
 
 This is why you can call capture directly in your ERB templates without specifying an object—it’s already part of the view’s context.
+
+### `<% content_for :title, "Products" %>`
+
+`content_for` is a method of `ActionView::Helpers::CaputureHelper` ==for child views to inject content into parent layouts== at specific locations.
+
+```ERB
+<% content_for :title, "Products" %>
+```
+
+It is used to set the page title dynamically in Rails views. It stores content("Products") in a named block (`:title`), and makes it available to the layout template, therefore allows each page to set its own title.
+
+In the view (e.g., `products/index.html.erb`):
+
+```erb
+<% content_for :title, "Products" %>
+```
+
+In the layout (e.g., `layouts/application.html.erb`):
+
+```erb
+<head>
+	<title><%= yield(:title) || "BOS" %></title>
+</head>
+```
+
+As a result, the browser tab/window's title becomes "Products" instead of a generic default.
+
+Common use cases include:
+
+```erb
+# Set page title
+<% content_for :title, "Edit Product" %>
+
+# Set meta tags
+<% content_for :meta_tags do %>
+	<meta name="description" content="...">
+<% end %>
+
+# Add page-specific JavaScript
+<% content_for :javascript do %>
+	<script>...</script>
+<% end %>
+```

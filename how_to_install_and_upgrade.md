@@ -13,7 +13,9 @@
 - Bundler is a Gem. 與某一個app有關，用於管理一個app用到的庫。
 - Rails is a Gem.
 
-#### Bundler vs. RubyGems
+==brew  +>  rbenv  +>  rubygems  +>  rails==
+
+### Bundler vs. RubyGems
 
 RubyGems 是**系統層面**的 gem 管理工具，安裝的 gem 是可OS全域使用的；而 Bundle 只是作用與某一個具體的app 範圍。
 
@@ -105,16 +107,16 @@ export PKG_CONFIG_PATH="/opt/homebrew/opt/ruby/lib/pkgconfig"
 
 ## Install or Upgrade Ruby with `rbenv`
 
-在使用rbenv更新 Ruby 版本前，要先用 brew 更新 rbenv，否则最新版的 ruby 可能不会列出来。
+在使用rbenv更新 Ruby 版本前，要先用 brew 更新 rbenv，否則最新版的 ruby 可能不會列出來。
 
 ### Upgrade Ruby with `rbenv`
 
 ```bash
-# list latest stable versions:
+# list the latest stable versions from ruby-lang.org:
 rbenv install -l
 
-# list all local versions:
-rbenv install -L
+# list all locally installed versions:
+rbenv versions
 
 # install a Ruby version:
 rbenv install 3.3.0
@@ -122,6 +124,9 @@ rbenv install 3.4.0-preview2
 
 # make 3.3.0 the defaul version on macOS
 rbenv global 3.3.0
+
+# remove a Ruby version:
+rbenv uninstall 3.4.0
 ```
 
 ==After `rbenv install` and `rbenv global`, the ~/.zshrc need to be modified for `ruby` to take effect:==
@@ -139,13 +144,7 @@ echo 'if command -v rbenv > /dev/null; then eval "$(rbenv init -)"; fi' >> ~/.zs
 source ~/.zshrc
 ```
 
-To remove a Ruby version:
-
-````bash
-rbenv uninstall 3.4.0
-````
-
-
+這裡要注意更改 Rails 項目中的 .ruby-version 文件中的版本號。
 
 ## RubyGems
 
@@ -153,7 +152,7 @@ RubyGems is a package management framework for Ruby. Commonly gems are used to d
 
 The RubyGems software allows you to easily download, install, and use ruby software packages on your system. The software package is called ==a “gem” which contains a packaged Ruby application or library.==
 
-#### Update RubyGems itself to the latest version on macOS
+#### Update RubyGems itself to the latest version
 
 ```bash
 gem update --system
@@ -245,7 +244,13 @@ Bundler is not a technology specific to Rails. ==Bundler is a dependency managem
 第一步，往項目的 Gemfile 里添加 gem "some-library"。這是“聲明”或提出要求。
 第二步：執行 bundle install 命令來安裝。
 
-`bundle install` installs the dependencies specified in your Gemfile.
+`````ruby
+# installs the dependencies specified in your Gemfile
+bundle install
+
+# 這個可以更新項目中的Rails版本到最新版
+bundle update
+`````
 
 ==The Bundler update steps should be performed **within the Rails app's directory**, not in the home (`~`) directory.== This is important because Bundler ne·eds to access the `Gemfile` and `Gemfile.lock` specific to your Rails application. 
 

@@ -6,7 +6,7 @@ Method，翻譯成中文，應該是什麼呢？方法、功能？我想「功�
 
 In Ruby, you can accurately say that ==a method is an object==. This is because Ruby is a language with a very consistent object model and everything in Ruby is an object, including methods.
 
-[`Method`](https://ruby-doc.org/3.4.1/Method.html) objects are created by [`Object#method`](https://ruby-doc.org/3.4.1/Object.html#method-i-method), and are associated with a particular object (not just with a class). They may be used to invoke the method within the object, and as a block associated with an iterator. They may also be unbound from one object (creating an [`UnboundMethod`](https://ruby-doc.org/3.4.1/UnboundMethod.html)) and bound to another.
+[`Method`](https://ruby-doc.org/3.4.1/Method.html) objects are created by `Object#method`, and are associated with a particular object (not just with a class). They may be used to invoke the method within the object, and as a block associated with an iterator. They may also be unbound from one object (creating an [`UnboundMethod`](https://ruby-doc.org/3.4.1/UnboundMethod.html)) and bound to another.
 
 When you reference a method in Ruby using the `method` method or the `&` operator, what you get is ==an object of the class `Method`.== This object encapsulates the method and allows you to interact with it as an object, including the ability to call the method, inspect its parameters, and so on.
 
@@ -44,23 +44,42 @@ end
 
 ```
 
-### One-line method
-
-#### the endless method
-
-```ruby
-def a_method_name(arg) = puts arg
-```
-
-
+### One-line method definition 
 
 ```ruby
 def a_method_name; end
 ```
 
+### The endless method definition
 
+```ruby
+def a_method_name(arg) = puts arg
 
+def method_name = 455
+```
 
+Available since Ruby 3.0. Ruby treats this as a “method with a single expression body”, sometimes called “endless method definition”. It’s exactly the same as:
+
+```ruby
+def method_name
+	455
+end
+```
+
+The value after = becomes the return value of the method. Works only if the entire body is one single expression (no multiple lines). If you need more than one statement, use the traditional `def … end`.
+
+You can still define arguments. For endless method definitions (`def … = …`), Ruby’s parser requires parentheses around the parameter list. Without parentheses the parser can’t unambiguously separate arguments from the `=` assignment operator. So:
+
+```ruby
+def add(a, b) = a + b   # Valid
+def add a, b = a + b    # SyntaxError
+```
+
+With endless method syntax, always write:
+
+```
+def name( args ) = expression
+```
 
 ## Kinds of Methods
 
@@ -70,12 +89,13 @@ Methods that you define for one particular object are called singleton methods.
 
 A class method belongs to the class itself.
 
-==%. 有三種 methods：== 
+==%. 有四種 methods：== 
 
-- ==Class methods：這是 class 給自己（工廠）用的；== 
-- ==Instance methods：這是 class 安裝進生產出來的 instance（object）上的； ==
+- ==Class methods：這是 class 給自己（工廠/機器）用的；== 
+- Instance methods：這是 class 安裝進其生產出來的 instance（object）上的；
 - ==Singleton methods：這是某一個 instance（object）在被生成後，自己搞來用的。== 
 	==20231223 %==
+- Module methods：與 class methods 一樣。
 
 ### What Are Class Methods For?
 
@@ -85,122 +105,6 @@ There are two main reasons: First, a class method can ==be used as a “ready-to
 In Ruby, method names can contain characters like ?, !, and =. The convention is to end method names with a ? if they return either true or false, with ! to indicate the method will have some sort of side effect like changing the object it's called on, and with = when defining setter methods.
 
 
-
-## Arguments
-
-
-
-
-
-### The splat `*` operator
-
-In Ruby, the `*` operator, when placed before the parameter in a method definition, is called the 'splat' operator. It's primarily used to specify that the method can accept one or more arguments. This makes it useful in scenarios where you don't know in advance how many arguments will be passed into the method. So essentially, ==the `*args` parameter allows this method to take any number of arguments.==
-
-```ruby
-def my_method( *args )
-	args.each { |arg| puts arg }
-end
-my_method("Hello", "World", "!")
-# => Hello
-# => World
-# => !
-```
-
-The `*names` parameter syntax in the method definition bellow represents what's called a "splat" operator in Ruby.
-
-```ruby
-def attribute(*names, default: NOT_SET)
-end
-```
-
-This allows the `attribute` method to accept any number of arguments (including zero), which will be collected into an array called `names`. For example, you can call this method with:
-
-```ruby
-attribute :user                         # names will be [:user]
-attribute :account, :request            # names will be [:account, :request]
-attribute :user, :account, :request     # names will be [:user, :account, :request]
-```
-
-This is a common pattern in Rails and Ruby in general when you want to define multiple similar items in a single method call. In this specific case, it allows declaring multiple current attributes at once rather than requiring separate calls to the `attribute` method for each one.
-
-==When using the splat operator (`*`) in a method parameter, Ruby always converts the arguments into an array==, even if only one or zero argument is passed.
-
-For example:
-
-```ruby
-def example(*names)
-	puts "names is a #{names.class}: #{names.inspect}"
-end
-
-example(:user)                 # names is an Array: [:user]
-example(:account, :request)    # names is an Array: [:account, :request]
-example()                      # names is an Array: []
-```
-
-This behavior is consistent and reliable - the splat always collects arguments into an array, which makes it easy to iterate through the arguments or use array methods on them within your method body.
-
-In the `attribute` method from your example, this allows for processing each attribute name with the same logic by simply iterating through the `names` array.
-
-The `default: NOT_SET` part is a keyword parameter that specifies a default value for attributes if none is provided.
-
-### Named Parameters
-
-The `default:` or any name you choose, is specifically using Ruby's **keyword arguments** (also called named parameters) feature. The syntax `default: NOT_SET` defines a keyword parameter named "default" with a default value of `NOT_SET` , which appears to be a constant defined elsewhere in the code.
-
-Ruby introduced keyword arguments in version 2.0 and enhanced them in later versions. These allow you to:
-
-1. Name your parameters explicitly when calling a method
-2. Make parameters optional with default values
-3. Distinguish between positional arguments and named arguments
-
-When calling this method, you could use it like:
-
-```ruby
-# Using the default value for 'default'
-attribute :user
-
-# Explicitly providing a value for the 'default' parameter
-attribute :user, default: nil
-attribute :account, default: -> { Company.default_account }
-```
-
-Keyword arguments improve code readability by making it clear what each argument represents, especially when a method takes multiple optional parameters. They're widely used throughout the Ruby and Rails ecosystems.
-
-### Parameters vs Arguments
-
-Both terms refer to values in method calls, but they're used at different points in the process:
-
-#### Parameters
-
-- Defined in the **method declaration**
-- The variables listed in the method definition
-- Act as placeholders that will receive values
-- Exist at design time
-
-```ruby
-def welcome(name, age, location: "Unknown")
-	# name, age, and location: are parameters
-end
-```
-
-#### Arguments
-
-- Used when **calling a method**
-- The actual values passed to a method
-- Provide concrete data to the parameters
-- Exist at runtime
-
-```ruby
-welcome("Alice", 30, location: "New York")
-# "Alice", 30, and "New York" are arguments
-```
-
-Maintaining the distinction is helpful for precision in technical discussions. 
-
-- "The method takes three parameters."
-- "I'm passing these arguments to the method."
-
-In Conversation, this distinction helps communicate clearly whether you're talking about the method's design or how it's being used.
 
 ## `super`
 
@@ -476,22 +380,3 @@ Manual setter methods let you add custom logic (validation, transformation, side
 
 `attr_writer` creates only setter methods.
 
-## Argument forwarding with `(...)`
-
-```ruby
-def #{method}(...)
-```
-
-The `...` (triple dot) syntax is Ruby's argument forwarding feature. It captures all arguments passed to the method (positional, keyword, and block arguments) and forwards them intact to another method
-
-When `super` is called inside the method, all the original arguments are passed to the parent class's implementation of the same method
-
-This is more concise than writing:
-```ruby
-def some_method(*args, **kwargs, &block)
-    # code here
-    super(*args, **kwargs, &block)
-end
-```
-
-It's particularly useful in this metaprogramming context where the method signature might be complex or could change in future Rails versions.

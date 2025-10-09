@@ -14,7 +14,7 @@ alias new_name original_name
 alias :new_name :original_name
 ```
 
-### How `alias` Works
+### How `alias` works
 
 When you alias a method:
 - Ruby creates a copy of the method with a new name.
@@ -139,7 +139,7 @@ This pattern is particularly useful in real-world applications for:
 - Implementing caching while preserving the original data-fetching logic
 - Adding performance monitoring around critical methods
 
-The key benefit is that we've extended the functionality without duplicating the core implementation, making our code more maintainable and following the DRY (Don't Repeat Yourself) principle.
+==The key benefit is that we've extended the functionality without duplicating the core implementation==, making our code more maintainable and following the DRY (Don't Repeat Yourself) principle.
 
 
 

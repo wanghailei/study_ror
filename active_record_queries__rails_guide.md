@@ -1673,83 +1673,59 @@ WHERE reviews.id IS NULL
 
 Which means "return all customers that have not made any reviews".
 
-## [13 Eager Loading Associations](https://guides.rubyonrails.org/active_record_querying.html#eager-loading-associations)
+## 13 Eager Loading Associations
 
-Eager loading is the mechanism for loading the associated records of the objects returned by `Model.find` using as few queries as possible.
+Eager loading is the mechanism for ==loading the associated records of the objects returned by `Model.find` using as few queries as possible.==
 
-### [13.1 N + 1 Queries Problem](https://guides.rubyonrails.org/active_record_querying.html#n-1-queries-problem)
+### The N + 1 Queries Problem
 
 Consider the following code, which finds 10 books and prints their authors' last_name:
 
-```
+```ruby
 books = Book.limit(10)
 
 books.each do |book|
-  puts book.author.last_name
+	puts book.author.last_name
 end
 ```
 
+This code looks fine at the first sight. But the problem lies within the total number of queries executed. The above code executes 1 (to find 10 books) + 10 (one per each book to load the author) = **11** queries in total.
 
+Active Record can solve this problem by specifying in advance all the associations that are going to be loaded. The methods are:`includes`, `preload` and`eager_load`.
 
-This code looks fine at the first sight. But the problem lies within the total number of queries executed. The above code executes 1 (to find 10 books) + 10 (one per each book to load the author) = **11**queries in total.
-
-#### [13.1.1 Solution to N + 1 Queries Problem](https://guides.rubyonrails.org/active_record_querying.html#solution-to-n-1-queries-problem)
-
-Active Record lets you specify in advance all the associations that are going to be loaded.
-
-The methods are:
-
-- [`includes`](https://api.rubyonrails.org/v7.1.3/classes/ActiveRecord/QueryMethods.html#method-i-includes)
-- [`preload`](https://api.rubyonrails.org/v7.1.3/classes/ActiveRecord/QueryMethods.html#method-i-preload)
-- [`eager_load`](https://api.rubyonrails.org/v7.1.3/classes/ActiveRecord/QueryMethods.html#method-i-eager_load)
-
-### [13.2 `includes`](https://guides.rubyonrails.org/active_record_querying.html#includes)
+### `includes`
 
 With `includes`, Active Record ensures that all of the specified associations are loaded using the minimum possible number of queries.
 
 Revisiting the above case using the `includes` method, we could rewrite `Book.limit(10)` to eager load authors:
 
-```
+```ruby
 books = Book.includes(:author).limit(10)
 
 books.each do |book|
-  puts book.author.last_name
+	puts book.author.last_name
 end
 ```
 
+The above code will execute just **2** queries, as opposed to the **11** queries from the original case.
 
-
-The above code will execute just **2** queries, as opposed to the **11** queries from the original case:
-
-```
-SELECT books.* FROM books LIMIT 10
-SELECT authors.* FROM authors
-  WHERE authors.id IN (1,2,3,4,5,6,7,8,9,10)
-```
-
-
-
-#### [13.2.1 Eager Loading Multiple Associations](https://guides.rubyonrails.org/active_record_querying.html#eager-loading-multiple-associations)
+#### Eager Loading Multiple Associations
 
 Active Record lets you eager load any number of associations with a single `Model.find` call by using an array, hash, or a nested hash of array/hash with the `includes` method.
 
-##### [13.2.1.1 Array of Multiple Associations](https://guides.rubyonrails.org/active_record_querying.html#array-of-multiple-associations)
+##### Array of Multiple Associations
 
+```ruby
+Customer.includes( :orders, :reviews )
 ```
-Customer.includes(:orders, :reviews)
-```
-
-
 
 This loads all the customers and the associated orders and reviews for each.
 
-##### [13.2.1.2 Nested Associations Hash](https://guides.rubyonrails.org/active_record_querying.html#nested-associations-hash)
+##### Nested Associations Hash
 
+```ruby
+Customer.includes( orders: { books: [:supplier, :author] } ).find(1)
 ```
-Customer.includes(orders: { books: [:supplier, :author] }).find(1)
-```
-
-
 
 This will find the customer with id 1 and eager load all of the associated orders for it, the books for all of the orders, and the author and supplier for each of the books.
 
@@ -1882,57 +1858,49 @@ user.comments.first.likes.to_a # raises an ActiveRecord::StrictLoadingViolationE
 
 
 
-## [14 Scopes](https://guides.rubyonrails.org/active_record_querying.html#scopes)
+## 14 Scopes
 
 Scoping allows you to specify commonly-used queries which can be referenced as method calls on the association objects or models. With these scopes, you can use every method previously covered such as `where`, `joins` and `includes`. All scope bodies should return an `ActiveRecord::Relation` or `nil` to allow for further methods (such as other scopes) to be called on it.
 
-To define a simple scope, we use the [`scope`](https://api.rubyonrails.org/v7.1.3/classes/ActiveRecord/Scoping/Named/ClassMethods.html#method-i-scope) method inside the class, passing the query that we'd like to run when this scope is called:
+To define a simple scope, we use the `scope` method inside the class, passing the query that we'd like to run when this scope is called:
 
-```
+```ruby
 class Book < ApplicationRecord
-  scope :out_of_print, -> { where(out_of_print: true) }
+	scope :out_of_print, -> { where(out_of_print: true) }
 end
 ```
 
-
-
 To call this `out_of_print` scope we can call it on either the class:
 
-```
+```ruby
 irb> Book.out_of_print
 => #<ActiveRecord::Relation> # all out of print books
 ```
 
-
-
 Or on an association consisting of `Book` objects:
 
-```
+```ruby
 irb> author = Author.first
 irb> author.books.out_of_print
 => #<ActiveRecord::Relation> # all out of print books by `author`
 ```
 
-
-
 Scopes are also chainable within scopes:
 
-```
+```ruby
 class Book < ApplicationRecord
-  scope :out_of_print, -> { where(out_of_print: true) }
-  scope :out_of_print_and_expensive, -> { out_of_print.where("price > 500") }
+    scope :out_of_print, -> { where(out_of_print: true) }
+    scope :out_of_print_and_expensive, -> { out_of_print.where("price > 500") }
 end
 ```
-
-
 
 ### [14.1 Passing in Arguments](https://guides.rubyonrails.org/active_record_querying.html#passing-in-arguments)
 
 Your scope can take arguments:
 
-```
+```ruby
 class Book < ApplicationRecord
-  scope :costs_more_than, ->(amount) { where("price > ?", amount) }
+	scope :costs_more_than, ->(amount) { where("price > ?", amount) }
 end
 ```
 
@@ -2919,3 +2887,291 @@ And last but not least, any kind of discussion regarding Ruby on Rails documenta
 This work is licensed under a [Creative Commons Attribution-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/) License
 
 "Rails", "Ruby on Rails", and the Rails logo are trademarks of David Heinemeier Hansson. All rights reserved.
+
+
+
+--------
+
+
+
+## Query Methods
+
+### Query
+
+#### `exists?`
+
+Checks if a record exists that matches the given ID or conditions​.
+
+```ruby
+# checks if a record with id 5 exists.
+Person.exists?(5)
+
+# does the same, accepting a string as input.
+Person.exists?('5')
+
+# checks if records with ids 1, 4, and 8 exist.
+Person.exists?(id: [1, 4, 8])
+
+# checks if a record with the name 'David' exists.
+Person.exists?(name: 'David')
+
+# checks if a record with the name 'Spartacus' and rating 4 exists.
+Person.where(name: 'Spartacus', rating: 4).exists
+```
+
+#### `first`
+
+Finds the first record (or the first N records if a parameter is supplied).
+
+If no order is defined, it returns the first record in the database according to the database's natural order. If an order is defined, it returns the first record according to that order.
+
+```ruby
+# returns the first object fetched by SELECT * FROM people
+Person.first
+
+# returns the first object from OFFSET 3 (which is OFFSET 2)
+Person.offset(3).first
+
+Person.where(["user_name = :u", { u: user_name }]).first
+```
+
+Please note that the natural order in most databases is based on the order of insertion, but this is not guaranteed across all databases and can be affected by factors such as the table's primary key and certain database settings. Therefore, ==it's recommended to specify an order if the order is important to your application​​.==
+
+#### `fifth`
+
+Returns the fifth record. If no order is defined it will order by primary key​.
+
+```ruby
+# returns the fifth object.
+Person.fifth
+
+# returns the fifth object that matches the where clause.
+Person.where( ["user_name = :u", { u: user_name }] ).fifth
+```
+
+#### `offset`
+
+This is used to skip a certain number of records.
+
+```ruby
+# Skip the first 10 users and then get the next 5.
+User.offset(10).limit(5)
+
+# returns the fifth object from OFFSET 3 (which is OFFSET 7).
+Person.offset( 3 ).fifth
+
+# Skip the first 5 users and then get the next 5:
+User.offset(5).limit(5)
+
+# Skip the first 10 products and then get the next 10:
+Product.offset(10).limit(10)
+
+# Skip the first 3 orders and then get the next 3:
+Order.offset(3).limit(3)
+```
+
+#### `find`
+
+This is used to retrieve a record by its primary key, namely finds a record by its ID. This can be a specific ID, a list of IDs, or an array of IDs.
+
+If one or more records cannot be found for the requested IDs, then `ActiveRecord::RecordNotFound` will be raised​​.
+
+find with a lock: This is used to handle concurrent transactions to prevent conflicts. For example, if two transactions are each adding 1 to a value, by locking the row, the second transaction will have to wait until the first is finished​​.
+
+```ruby
+# Find the user with primary key (id) of 1.
+User.find(1)
+
+# Find the product with primary key (id) of 100.
+Product.find(100)
+
+# finds the objects with IDs 7 and 17.
+Person.find([7, 17])
+
+```
+
+#### `find_by`
+
+Finds the first record matching the specified conditions. If no record is found, it returns `nil`​​. This is similar to find but allows you to specify any column you want, not just the primary key.
+
+```ruby
+# Assuming username is a unique column
+User.find_by( username: 'john_doe' )
+
+# Finds the first user from a specific city:
+User.find_by city: 'New York'
+
+# finds the first Post with the name 'Spartacus' and rating 4.
+Post.find_by name: 'Spartacus', rating: 4
+
+# finds the first Post that was published less than 2 weeks ago.
+Post.find_by "published_at < ?", 2.weeks.ago
+
+# Finds the first order that was placed today:
+Order.find_by 'created_at >= ?', Date.today
+
+# Finds the first product with a certain SKU:
+Product.find_by sku: 'ABC123'
+```
+
+#### `find_or_initialize_by`
+
+Returns the first item or a new instance (which is not persisted to the database)​1​.
+
+#### `find_or_create_by`
+
+Returns the first item or creates it and returns it​1.
+
+### Sorting
+
+#### `order`
+
+This is used to sort the records according to a certain column.
+
+```ruby
+# Get all users, ordered by their name.
+User.order :name
+
+# Get all products, ordered by their price in ascending order.
+Product.order price: :asc
+
+# Get all users, ordered by their signup date in descending order.
+User.order created_at: :desc
+
+# Get all orders, ordered first by user_id, then by created_at.
+Order.order user_id: :asc, created_at: :desc
+```
+
+#### `where`
+
+Used to filter records based on certain conditions​​.
+
+```ruby
+# Finds all users who are active.
+User.where active: true
+
+# Finds all products in a certain category.
+Product.where category: 'Electronics'
+
+# Finds all users who signed up in the past week:
+User.where 'created\_at >= ?', 1.week.ago
+
+# Finds all orders that have been shipped and are not cancelled:
+Order.where status: ['shipped', 'not cancelled']
+
+# finds all books with a category of "Ruby".
+Book.where category: "Ruby"
+
+# finds all books with a category of "Ruby" and an author of "Jesus Castello".
+Book.where category: "Ruby", author: "Jesus Castello"
+
+# finds all books that do not have a category of "Java".
+Book.where.not category: "Java"
+
+# finds all books with an id of 1, 2, or 3.
+Book.where id: [1,2,3]
+
+# finds all books that have a comment with an id of.
+Book.joins(:comments).where(comments: { id: 2 })
+
+# finds the first object with "administrator = 1", ordered by "created_on" in descending order.
+Person.where("administrator = 1").order("created_on DESC").find(1)
+```
+
+#### `select`
+
+This is used to specify only the columns you are interested in, reducing the amount of data that needs to be read from the database.
+
+```ruby
+# Select only the name and email of all users
+User.select(:name, :email)
+
+# Select only the product name and price:
+Product.select(:name, :price)
+
+# Select only the order number and status:
+Order.select(:number, :status)
+```
+
+
+
+### Filtering
+
+#### `group`
+
+This is used to group the records by a certain column, which can be useful for aggregate queries.
+
+```ruby
+# Group users by their account status
+User.group(:account_status)
+
+# Group users by their city:
+User.group(:city)
+```
+
+#### `having`
+
+This is used in conjunction with group to filter the groups.
+
+```ruby
+# Group users by account status, and select only those groups with more than 5 users
+User.group(:account_status).having("count(*) > 5")
+
+# Group users by their city and select only those cities with more than 10 users:
+User.group(:city).having('count(*) > 10')
+
+# Group products by their category and select only those categories with more than 5 products:
+Product.group(:category).having('count(*) > 5')
+
+# Group orders by their user_id and select only those users with more than 1 order:
+Order.group(:user_id).having('count(*) > 1')
+```
+
+
+
+#### `limit`
+
+This is used to limit the number of records returned.
+
+```ruby
+# Get the first 5 users
+User.limit(5)
+
+# Get the first 10 products:
+Product.limit(10)
+
+# Get the first 3 orders:
+Order.limit(3)
+```
+
+
+
+#### `joins`
+
+Gluing tables together with the joins method. This method allows us to tell `ActiveRecord` to perform a SQL `join` on its associations.
+
+`Person.all.joins(:role)` which generates SQL like this:
+
+```sql
+SELECT "people".\*
+FROM "people"
+INNER JOIN "roles"
+ON "roles.id" = "people"."role\_id";
+```
+
+
+
+```ruby
+# Joins the users table with the orders table based on the user_id and 
+# gets all the users who have placed an order.
+User.joins(:orders)
+
+# Joins the products table with the order_items table and 
+# gets all the products that have been ordered:
+Product.joins(:order_items)
+
+# Joins the orders table with the users table and 
+# gets all the orders placed by users from a specific city:
+Order.joins(:user).where(users: { city: 'New York' })
+```
+

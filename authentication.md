@@ -1,4 +1,4 @@
-# Auth
+# Authentication
 
 ## Where the authorisation logic should be defined, in the Controller or the Model?
 

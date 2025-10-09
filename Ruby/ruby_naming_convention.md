@@ -38,3 +38,44 @@ Module names should represent their purpose - adjectives for behaviors, nouns fo
 
 `Callbacks`, `Validations`
 
+
+
+## The naming of .rb files
+
+For Ruby files that have a class defined inside a module, the standard naming convention is:
+
+```bash
+module_name/class_name.rb
+```
+
+The module name becomes a directory, and the class name becomes the filename.
+
+```ruby
+module Mod
+    class Cla
+    end
+end
+```
+
+The file should be named:
+```
+mod/cla.rb
+```
+
+If you have nested modules, each module becomes a directory in the path:
+```
+module A
+    module B
+        class C
+        end
+    end
+end
+```
+
+Would be in:
+```
+a/b/c.rb
+```
+
+This naming convention is crucial for Ruby's autoloading mechanisms to work properly. In Rails and many Ruby gems, this convention is strictly followed to enable autoloading. For instance, a class `ActiveRecord::Base` would be defined in a file located at `active_record/base.rb`.
+

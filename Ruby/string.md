@@ -77,3 +77,30 @@ While `<<` is more efficient for building strings through multiple concatenation
 Each has its purpose: `<<` for building strings efficiently through multiple operations, and `+` for non-destructive concatenation when you need a new string without changing the originals.
 
 The right tool depends on the specific context and requirements of your code.
+
+
+
+## `#{}` for string interpolation
+
+The `#{}` syntax in Ruby is string interpolation. It allows you to embed Ruby expressions directly within a string. When Ruby processes a string that contains `#{}`, it evaluates the Ruby code inside the curly braces and converts the result to a string, which then becomes part of the larger string.
+
+For example:
+
+```ruby
+# ActionView::Helpers::TagHelper.tag
+"<#{name}#{tag_builder.tag_options(options, escape) if options}#{open ? ">" : " />"}"
+```
+
+There are three instances of string interpolation:
+
+1. `#{name}` - Inserts the value of the `name` variable
+2. `#{tag_builder.tag_options(options, escape) if options}` - Calls the method `tag_options` and inserts its result if `options` is not nil
+3. `#{open ? ">" : " />"}` - Inserts ">" if `open` is true, otherwise inserts " />"
+
+This allows you to construct HTML tags dynamically based on the method parameters. For example, if `name` is "div", `options` is `{ class: "container" }`, and `open` is true, this would evaluate to:
+
+```
+"<div class=\"container\">"
+```
+
+String interpolation is one of Ruby's most useful features for building strings dynamically.

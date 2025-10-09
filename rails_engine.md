@@ -1,4 +1,24 @@
-# Rails Engine
+# Railtie and Engine
+
+Every `Rails::Application` is just an `Rails::Engine`, which allows for simple feature and application sharing.
+
+`Rails::Engine` allows you to wrap a specific Rails application or subset of functionality and share it with other applications or within a larger packaged application. 
+
+Any `Rails::Engine` is a `Rails::Railtie`.
+
+
+
+## Railtie
+
+`Rails::Railtie` is the core of the Rails framework and provides several hooks to extend Rails and/or modify the initialization process.
+
+Every major component of Rails (Action Mailer, Action Controller, Active Record, etc.) implements a railtie. Each of them is responsible for their own initialization. This makes Rails itself absent of any component hooks, allowing other components to be used in place of any of the Rails defaults.
+
+
+
+## Engine
+
+
 
 A Rails application is actually just a "supercharged" Rails Engine, with ==the `Rails::Application` class inheriting a lot of its behaviour from `Rails::Engine`.==
 

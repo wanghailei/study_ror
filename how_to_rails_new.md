@@ -7,7 +7,7 @@ You can specify extra command-line arguments to be used every time 'rails new' r
 ==But tailoring rails new command should be as little as possible, since it can be hard to add back parts of Rails you initially skip==, and for the most part, the parts of Rails you don’t use can sit there, inert, not bothering anyone.
 
 ```bash
-rails new appname -a=propshaft
+rails new appname --main
 ```
 
 ## ```rails new``` Options:
@@ -28,7 +28,7 @@ rails new appname -a=propshaft
 
 
 
-## Generate a new Rails app with --main
+## Generate a new Rails app with `--main`
 
 `--dev` uses your locally checked-out Rails repository to create the app. 
 
@@ -48,8 +48,6 @@ gem "rails", github: "rails/rails", branch: "main"
 ```
 
 ## Rails
-
-$ sudo gem install rails
 
 $ rails new my-app
 
@@ -76,3 +74,20 @@ An error occurred while installing websocket-driver (0.7.6), and Bundler cannot 
 `gem pristine websocket-driver --version 0.7.6`
 
 如果提示沒有寫權限，則加 sudo。
+
+
+
+# Boostrap a new Rails app
+
+## README
+
+
+
+## root route - Welcome
+
+
+
+
+
+
+

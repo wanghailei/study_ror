@@ -54,15 +54,9 @@ esbuid!
 
 
 
-
-
-### How to bundle, the JSMP API way.
-
-
-
 ## 處理好的.js應該放在哪裡？`app/javascript`/ and `vendor/` ？
 
-It seems likely that in a Rails application, the **vendor** directory is for third-party code and libraries, while **app/javascript** is for your application's JavaScript code, managed by tools like Webpacker or import maps. The evidence leans toward ==using the root directory for managing dependencies, with "vendor" for external assets and "app/javascript" for application-specific JavaScript.==
+In a Rails app, the **/vendor** directory is for third-party code and libraries, while **app/javascript** is for your application's JavaScript code, managed by tools like Webpacker or import maps. The evidence leans toward ==using the root directory for managing dependencies, with "vendor" for external assets and "app/javascript" for application-specific JavaScript.==
 
 ### app/javascript
 
@@ -73,10 +67,6 @@ It seems likely that in a Rails application, the **vendor** directory is for thi
 **Primary place for your app’s JavaScript code.** Meant for **your own JS code**, Stimulus controllers, or code closely tied to your app’s functionality. But you won’t use `app/javascript` to manage external libraries like Carbon unless you are bundling.
 
 Rails uses this directory especially when you set up **Webpacker** (Rails 6) or **jsbundling-rails** (Rails 7+).	
-
-**app/javascript Directory**: This is for your application's own JavaScript code in modern Rails (6 and later). It's managed by tools like Webpacker or import maps, where you write custom scripts, like for Carbon Web Components integration. 
-
-Purpose if "app/javascript"**: this directory is where you place your application’s own JavaScript code, managed by a JavaScript bundler like Webpacker or import maps. It’s for custom scripts, components, or integrations, such as those for BOS.
 
 **Usage in Rails**: You write your JavaScript files here, typically in subdirectories like `app/javascript/packs` for Webpacker or directly in `app/javascript` for import maps, and it’s processed for serving in your application, aligning with the user’s integration of Carbon Web Components.
 
@@ -129,19 +119,7 @@ vendor/assets/
 
 
 
-**Why it’s useful for you:**
-
-Since you’re:
-
-•	**Avoiding npm in production**
-
-•	Using **importmap** for JS
-
-•	Managing all Carbon assets **locally and manually**
-
-
-
-**→ vendor/assets/ is PERFECT** for storing:
+**vendor/assets/ is PERFECT** for storing:
 
 •	Carbon Web Components compiled JavaScript
 
@@ -172,15 +150,9 @@ Excellent question — and it’s super relevant since you’re using **Rails 8*
 
 
 
-Let’s go over:
 
 
-
-------
-
-
-
-**📁 Where to Put 3rd Party JS Like Carbon Web Components?**
+### Where to Put 3rd Party JS Like Carbon Web Components?
 
 
 
@@ -245,34 +217,6 @@ Let’s go over:
 ​	•	Safe place for fonts, images, or SCSS files.
 
 ​	•	Not for JS if you use importmap — JS here won’t be picked up unless you explicitly add paths.
-
-
-
-------
-
-
-
-**🧩 Why You See JS Loading Errors in ERB**
-
-
-
-If you’re getting 404s or Uncaught ReferenceError, it’s often one of these:
-
-
-
-**1. Wrong Path in <script>**
-
-​	•	You might be pointing to /javascript/carbon.js, but it should be /assets/carbon.js (or whatever path Propshaft maps).
-
-
-
-Check via browser:
-
-```
-http://localhost:3000/assets/carbon.js
-```
-
-
 
 
 

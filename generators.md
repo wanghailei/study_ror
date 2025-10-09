@@ -94,7 +94,7 @@ rails g controller Book index new edit
 
 
 
-#### `rails generate migration AddNewTable`
+#### `rails g migration AddNewTable`
 
 
 

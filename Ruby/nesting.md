@@ -1,6 +1,6 @@
 # Nesting
 
-代碼肯定需要被分組，也往往需要被嵌套，這個做設計時的 group 手法沒有區別。所謂 Namespacing 或 Nesting 其實就是 grouping，這一點都不神奇，尤其是在Ruby是非常直白的。一個class，放在一個module裡還是另一個class根本沒啥區別。
+代碼肯定需要被分組，也往往需要被嵌套，這個做設計時的 grouping 手法沒有區別。所謂 Namespacing 或 Nesting 其實就是 grouping，這一點都不神奇，尤其在Ruby中，這是非常直白的。一個class，放在一個module裡還是另一個class中，根本沒啥區別。
 
 ==**Module is group.**== Period.
 
@@ -16,9 +16,27 @@ Unlike Java, which employs a package system for namespacing (e.g., com.ibm.lib.e
 
 
 
-In a nested definition like `module Admin; class User; end; end`, Ruby is aware of the parent namespace (`Admin`), ensuring that constant lookup resolves `User` to `Admin::User`, not a top-level `User`. 
+In a nested definition,
 
-In contrast, inline definitions (e.g., `class Admin::User`) treat the class as standalone, potentially leading to ambiguity. ==Nested definitions automatically create the outer module if undefined, while inline definitions require pre-definition to avoid `NameError`==, underscoring nesting's practical advantages for namespace management.
+```ruby
+module Admin
+    class User
+    end
+end
+```
+
+Ruby is aware of the parent namespace (`Admin`), ensuring that constant lookup resolves `User` to `Admin::User`, not a top-level `User`. 
+
+In an inline definition, in contrast, 
+
+```ruby
+class Admin::User
+end
+```
+
+the class is treated as standalone, potentially leading to ambiguity. 
+
+==Nested definitions automatically create the outer module if undefined, while inline definitions require pre-definition to avoid `NameError`==, underscoring nesting's practical advantages for namespace management.
 
 ```ruby
 module Admin
@@ -50,7 +68,7 @@ Admin::NestedController.superclass # => Admin::BaseController
 Admin::InlineController.superclass # => BaseController
 ```
 
-The reason for this behavior has to do with how constants, like class and module names, are defined and referenced in ruby.
+The reason for this behavior has to do with how constants, like class and module names, are defined and referenced in Ruby.
 
 ```ruby
 module Admin
@@ -184,6 +202,7 @@ module ActiveJob
         module ResqueAdapter
             # Resque-specific implementation
             extend self
+            
             def enqueue(job)
 				# Resque enqueue implementation
             end
@@ -693,6 +712,89 @@ The main difference is conceptual rather than technical. **Modules** typically r
 Use modules for pure namespacing, when you don't need instances.
 
 Use class nesting when there's a strong conceptual relationship.
+
+## A Module in a Method
+
+You can define a module inside a method in Ruby. This creates a module that's only defined when the method runs and is scoped to where the method chooses to make it available.
+
+```ruby
+def create_helper_module
+  # Define a module inside this method
+  module TemporaryHelper
+    def self.calculate(x)
+      x * 2
+    end
+    
+    def helper_method
+      "I'm helping!"
+    end
+  end
+  
+  # Return the module as the method result
+  return TemporaryHelper
+end
+
+# Use the module created by the method
+helper = create_helper_module
+puts helper.calculate(5)  # Outputs: 10
+
+# The module exists only after the method runs
+# puts TemporaryHelper.calculate(5)  # Error! NameError: uninitialized constant TemporaryHelper
+```
+
+### Technical Details
+
+When you define a module inside a method:
+
+1. The module is created when the method executes
+2. The module is defined in the current lexical scope (not available outside unless returned or assigned)
+3. Each time the method runs, it creates a new module (even with the same name)
+4. The module itself behaves normally otherwise
+
+### Practical Uses
+
+This technique enables:
+
+1. **Dynamic module generation**: Creating modules with customized functionality based on method parameters
+2. **Encapsulation**: Keeping helper modules private to specific contexts
+3. **Metaprogramming**: Generating specialized modules on demand
+
+```ruby
+def build_behavior_for(entity_type)
+  # Create a module customized for a specific entity type
+  module CustomBehavior
+    # Define actions for the entity
+    def perform_special_task
+      puts "#{entity_type} is performing its special task!"
+    end
+    
+    # Define helper functions
+    def self.valid_for?(object)
+      object.respond_to?(:type) && object.type == entity_type
+    end
+  end
+  
+  return CustomBehavior
+end
+
+# Generate a custom module for robots
+robot_behavior = build_behavior_for("robot")
+
+# Use the dynamically created module
+class Robot
+  include robot_behavior
+  attr_reader :type
+  
+  def initialize
+    @type = "robot"
+  end
+end
+
+robot = Robot.new
+robot.perform_special_task  # Outputs: robot is performing its special task!
+```
+
+This technique demonstrates Ruby's flexible nature in allowing you to create modules dynamically within method scope, following the principle that code itself can be treated as data to be generated and manipulated.
 
 ## Nested Blocks
 

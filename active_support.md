@@ -1,6 +1,10 @@
 # Active Support
 
+==% ActiveSupport 是個武器庫啊！是個寶庫，慢慢挖掘！20231227 %==
 
+Active Support is a collection of utility classes and Ruby standard library extensions. Active Support is responsible for ==providing Ruby language extensions and utilities==. It offers a richer bottom-line at the language level.
+
+These additions reside in this package so they can be loaded as needed in Ruby projects outside of Rails.
 
 ## `CurrentAttributes`
 
@@ -85,6 +89,12 @@ A word of caution: It's easy to overdo a global singleton like Current and tangl
 ## Concern
 
 A concern in Rails is a module that allows you to extract common code from multiple models, controllers, or other classes into a reusable unit. Concerns are an implementation of the mixin pattern, built using Ruby modules, and are a core part of Rails' approach to code organization and reuse.
+
+Concerns make large controllers or models easier to understand and manage. This also has the advantage of reusability when multiple models (or controllers) share the same concerns.
+
+A concern is only responsible for a focused subset of the model's responsibility.
+
+The `ActiveSupport::Concern` gives us a simpler way to include them.
 
 ### Key Features of Concerns
 

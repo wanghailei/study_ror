@@ -2,21 +2,7 @@
 
 
 
-# ActiveSupport
 
-==% ActiveSupport 是個武器庫啊！是個寶庫，慢慢挖掘！20231227 %==
-
-Active Support is a collection of utility classes and Ruby standard library extensions. Active Support is responsible for ==providing Ruby language extensions and utilities==. It offers a richer bottom-line at the language level.
-
-These additions reside in this package so they can be loaded as needed in Ruby projects outside of Rails.
-
-## Concerns
-
-Concerns are a way to make large controllers or models easier to understand and manage. This also has the advantage of reusability when multiple models (or controllers) share the same concerns.
-
-A concern is only responsible for a focused subset of the model's responsibility.
-
-The ActiveSupport::Concern gives us a simpler way to include them.
 
 
 

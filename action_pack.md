@@ -11,27 +11,54 @@ It consists of several modules:
 
 ==Rails users only directly interface with the Action Controller module.== Necessary Action Dispatch functionality is activated by default and Action View rendering is implicitly triggered by Action Controller.
 
-## `AbstractController`
+## Routing
 
-`AbstractController` is a base class in Rails that provides the core functionalities needed for any type of controller, including rendering and layout support, view paths, and callback hooks. ==`AbstractController` alone doesn't know how to handle HTTP requests.==
+The Rails router matches incoming HTTP requests to specific controller actions in your Rails application based on the URL path. The router also generates path and URL helpers based on the resources configured in the router.
 
-==`ActionController::Base`, inherited from `AbstractController`, is specifically tailored for handling HTTP requests in a web application.== It adds functionalities like request and response handling, sessions, cookies, and much more.&#x20;
+### Routes
 
-The relationship between `AbstractController` and `ActionController` is that of a **generalisation-specialisation** (or base-derived) relationship.
+Routes' primary purpose is to connect view to controller, and they also serve as a UI element--URL.
+
+Rules:
+
+* Always use canonical routes that conform to Rails’ defaults.
+* Avoid custom actions in favor of creating new resources that use Rails’\
+	default actions.
+* User-friendly URLs should be added in addition to the canonical routes.
+
+==Using resources to define routes: `resources :widgets`. It's the best way.==
+
+`bin/rails routes -g widgets`
+
+If the app’s routes are made up entirely of calls to resources, it becomes easy to understand the app at a high level.
+
+
+
+### ActionDispatch
+
+
 
 ## `ActionController`
 
 Action Controllers are the core of a web request in Rails. They are made up of one or more actions that are executed on request and then either it renders a template ==or redirects to another action.==
 
-An ActionController is made up of one or more actions that are executed on request and then either it renders a template or redirects to another action. An action is defined as a public method on the controller, which will automatically be made accessible to the web-server through Rails Routes.
+An `ActionController` is made up of one or more actions that are executed on request and then either it renders a template or redirects to another action. An action is defined as a public method on the controller, which will automatically be made accessible to the web-server through Rails Routes.
 
-## `ApplicationController`
+### `ApplicationController`
 
 By default, only the `ApplicationController` in a Rails application inherits from `ActionController::Base`. All other controllers inherit from `ApplicationController`.
 
 ==`ApplicationController` is a central controller class that you define in your Rails application to include shared functionality across all of your controllers.== This gives you one class to configure things such as request forgery protection and filtering of sensitive request parameters.&#x20;
 
 The `ApplicationController` source code is in a Rails application project folder. ==% 在 Rails 的source code 文件夾裡面找不到一個 ApplicationController 文件，因為它是被 rails new 生成出一個 app 代碼結構後才產生的。20231219 %==
+
+### `AbstractController`
+
+`AbstractController` is a base class in Rails that provides the core functionalities needed for any type of controller, including rendering and layout support, view paths, and callback hooks. ==`AbstractController` alone doesn't know how to handle HTTP requests.==
+
+==`ActionController::Base`, inherited from `AbstractController`, is specifically tailored for handling HTTP requests in a web application.== It adds functionalities like request and response handling, sessions, cookies, and much more.&#x20;
+
+The relationship between `AbstractController` and `ActionController` is that of a **generalisation-specialisation** (or base-derived) relationship.
 
 ## Action
 
@@ -53,25 +80,43 @@ The remaining request parameters, the session (if one is available), and the ful
 
 ## Parameters
 
-All request parameters, whether they come from a query string in the URL or form data submitted through a POST request are available through the params method which returns a hash.
+All request parameters, whether they come from a query string in the URL or form data submitted through a POST request are available through the `params` method which returns a hash.
 
 There are two kinds of parameters possible in a web application.
 
-The first are parameters that are sent as part of the URL, called query string parameters. The query string is everything after "?" in the URL. ==% I call it "Query parameters" or even "GET parameters". %==
+The first are parameters that are sent as part of the URL, called query string parameters. The query string is everything after "`?`" in the URL.
 
-The second type of parameter, usually referred to as POST data, comes from an HTML form which has been filled in by the user. It's called POST data because it can only be sent as part of an HTTP POST request. ==% I call it "POST parameters". %==
+The second type of parameter, usually referred to as POST data, comes from an HTML form which has been filled in by the user. It's called POST data because it can only be sent as part of an HTTP POST request. 
+
+==% I call them "Query parameters" and "POST parameters". 或許應該叫做 "GET request parameters" and "POST request parameters"。 %==
 
 Rails does not make any distinction between the two kinds of parameters, and both are available in the params hash in your controller.
 
 ``params`` may be used for more than text, but entire files can be uploaded. In HTTP, files are uploaded as a ``multipart/form-data POST`` message.
 
+### Nested attributes
+
+```ruby
+def recipe_params
+    params.require(:recipe).permit( :title, :version, :valid_since, :valid_until, :status,
+        recipe_items_attributes: [:id, :ingredient_id, :quantity, :uom_id, :position, :note, :_destroy]
+    )
+end
+```
+
+`params.require(:recipe)` ensures the ` :recipe` key exists. 
+
+`.permit(...)` allows only the listed attributes through. 
+
+The nested hash syntax `recipe_items_attributes: [...]` properly handles the nested attributes for `accepts_nested_attributes_for`. This is the correct Rails pattern for models with nested attributes! 
+
 ## Sessions
 
-==Sessions allow you to store objects in between requests.== This is useful for objects that are not yet ready to be persisted, such as a Signup object constructed in a multi-paged process, or objects that don't change much and are needed all the time, such as a User object for a system that requires login.&#x20;
+==Sessions allow you to store objects in between requests.== This is useful for objects that are not yet ready to be persisted, such as a Signup object constructed in a multi-paged process, or objects that don't change much and are needed all the time, such as a `User` object for a system that requires login.
 
 The session should not be used, however, as a cache for objects where it's likely they could be changed unknowingly. It's usually too much work to keep it all synchronised – something databases already excel at.
 
-==By default, sessions are stored in an encrypted browser cookie== (see `ActionDispatch::Session::CookieStore`). Thus the user will not be able to read or edit the session data. However, the user can keep a copy of the cookie even after it has expired, so ==you should avoid storing sensitive information in cookie-based sessions==.
+==By default, sessions are stored in an encrypted browser cookie== (`ActionDispatch::Session::CookieStore`). Thus the user will not be able to read or edit the session data. However, the user can keep a copy of the cookie even after it has expired, so ==you should avoid storing sensitive information in cookie-based sessions==.
 
 ## Responses
 
@@ -159,20 +204,5 @@ Disadvantages:
 
 
 
-## Routes
 
-Routes' primary purpose is to connect view to controller, and they also serve as a UI element--URL.
-
-Rules:
-
-* Always use canonical routes that conform to Rails’ defaults.
-* Avoid custom actions in favor of creating new resources that use Rails’\
-	default actions.
-* User-friendly URLs should be added in addition to the canonical routes.
-
-==Using resources to define routes:== ======`resources :widgets`====. It's the best way.==
-
-`bin/rails routes -g widgets`
-
-If the app’s routes are made up entirely of calls to resources, it becomes easy to understand the app at a high level.
 

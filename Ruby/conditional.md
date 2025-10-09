@@ -98,7 +98,7 @@ user.profile.address.city if user && user.profile && user.profile.address
 user&.profile&.address&.city
 ```
 
-This operator checks if the object is `nil` before attempting to call the method. If the object is `nil`, it returns `nil` instead of raising a `NoMethodError`.
+==This operator checks if the object is `nil` before attempting to call the method.== If the object is `nil`, it returns `nil` instead of raising a `NoMethodError`.
 
 ### 2. The `try` Method (in Rails)
 
