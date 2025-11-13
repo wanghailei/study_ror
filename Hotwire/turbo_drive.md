@@ -1,8 +1,8 @@
 # Navigate with Turbo Drive
 
-Turbo Drive is the part of Turbo that enhances page-level navigation, and it’s the evolution of  Turbolinks.
+Turbo Drive is the part of Turbo that enhances ==page-level navigation==, and it’s the evolution of Turbolinks. Turbo Drive watches for link clicks and form submissions, performs them in the background, and updates the page without doing a full reload. ==No special code needed! Turbo Drive works automatically with `<%= link_to %>` and `<%= form_with %>`.==
 
-Turbo Drive watches for link clicks and form submissions, performs them in the background, and updates the page without doing a full reload. No special code needed! Turbo Drive works automatically with `<%= link_to %>` and `<%= form_with %>`.
+==In modern Rails, Turbo Drive is automatically "installed" and enabled as part of the default Hotwire stack.== In `app/javascript/application.js`, the first line — `import "@hotwired/turbo-rails"` — is the key. It pulls in the Turbo Rails integration, which in turn enables Turbo Drive, Turbo Frames, and Turbo Streams.
 
 ## Turbo Drive is "full-page refresh 2.0". - WHL
 
@@ -23,6 +23,16 @@ All browser features still work - back button, history, SEO, etc. Pages look the
 | No control over transitions        | You can hook into turbo:visit, etc.    |
 
 **Turbo Drive = the new standard for server-rendered, fast, native-feeling navigation** — without becoming an SPA.
+
+### How Turbo Drive works internally
+
+Turbo Drive replaces Rails’ traditional UJS navigation by intercepting `<a>` and `<form>` submissions:
+
+- It captures every `<a href="...">` click (unless opted-out).
+- It performs an XHR request and replaces the `<body>` with the new content.
+- It preserves scroll position, runs head diffing, updates `<title>`, and dispatches lifecycle events (`turbo:visit`, `turbo:load`, etc).
+
+That’s why you see pages update instantly without full reloads — it’s **working automatically** in the background.
 
 ## Page Navigation Basics
 
@@ -106,11 +116,9 @@ An example use case is adding exit animation for visits:
 
 ```javascript
 document.addEventListener("turbo:before-render", async (event) => {
-  event.preventDefault()
-
-  await animateOut()
-
-  event.detail.resume()
+    event.preventDefault()
+    await animateOut()
+    event.detail.resume()
 })
 ```
 
@@ -251,7 +259,7 @@ To disable the progress bar entirely, set its `visibility` style to `hidden`:
 
 In tandem with the progress bar, Turbo Drive will also toggle the [`[aria-busy]` attribute](https://www.w3.org/TR/wai-aria/#aria-busy) on the page’s `<html>` element during page navigations started from Visits or Form Submissions. Turbo Drive will set `[aria-busy="true"]` when the navigation begins, and will remove the `[aria-busy]` attribute when the navigation completes.
 
-## [﹟](https://turbo.hotwired.dev/handbook/drive#reloading-when-assets-change)Reloading When Assets Change
+## Reloading When Assets Change
 
 As we saw above, Turbo Drive merges the contents of the `<head>` elements. However, if CSS or JavaScript change, that merge would evaluate them on top of the existing one. Typically, this would lead to undesirable conflicts. In such cases, it’s necessary to fetch a completely new document through a standard, non-Ajax request.
 

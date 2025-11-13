@@ -133,7 +133,7 @@ In Rails 7.1, the `db:drop` and `db:setup` tasks are part of the suite of databa
 
 It's important to note that ==these tasks interact directly with your database, so you should always ensure you have backups of your data== (if necessary) and understand the implications of running these commands, especially in a shared or production environment.
 
-### Drop and recreate the PostgreSQL database:
+### Drop and recreate database:
 
 ```ruby
 rake db:drop

@@ -110,7 +110,7 @@ In Ruby, method names can contain characters like ?, !, and =. The convention is
 
 Inside the body of a method definition, you can use the `super` keyword to jump up to the next-highest definition in the method-lookup path of the method you’re currently executing. The `super` keyword tells an object to search for and execute ==a method of identical name== defined in the object’s namespace.
 
-When `super()` is used in an instance method, ==a method of the same name but in the superclass== of the current class is called. This is often used in method overrides, where you want to augment or modify the behavior of a method inherited from the superclass, not replace it entirely.
+When `super()` is used in an instance method, ==a method of the same name but in the superclass of the current class is called.== This is often used in method overrides, where you want to augment or modify the behavior of a method inherited from the superclass, not replace it entirely.
 
 * Called with no argument list (empty or otherwise), `super` automatically forwards the arguments that were passed to the child method.
 * Be noted, if `super()` is used, namely `super` with parentheses but no arguments, it calls the superclass method without any arguments, regardless of what arguments were passed to the child method.

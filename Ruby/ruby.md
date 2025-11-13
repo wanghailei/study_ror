@@ -46,12 +46,6 @@ Variable 或 Constant 就是些容器/載具，而且可能是透明材質的，
 
 
 
-	alias_method :after_reset, :resets
-	
-	delegate :set, :reset, to: :instance
-
-
-
 ```ruby
 def generated_attribute_methods
 	@generated_attribute_methods ||= Module.new.tap { | mod | include mod }

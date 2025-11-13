@@ -179,3 +179,12 @@ Key differences:
 - Be aware that aliases create copies, so they won't inherit changes to the original method
 
 The `alias` keyword is a powerful Ruby feature that enables elegant metaprogramming solutions when used appropriately.
+
+
+
+
+
+```ruby
+delegate :set, :reset, to: :instance
+```
+

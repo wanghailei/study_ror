@@ -27,7 +27,7 @@ From user interaction perspective, I think ==Turbo Stream is just about output==
 - **Input**: Users click a link or submit a form *inside* a `<turbo-frame>`.
 - **Output**: The server returns an HTML fragment (without full layout), and Turbo replaces just that frame.
 
-**It’s a self-contained interaction cycle.**You can think of it like a **mini web browser inside the page**: navigation, form submission, back-forward caching — all scoped to that frame.
+**It’s a self-contained interaction cycle.** ==You can think of it like a **mini web browser inside the page**: navigation, form submission, back-forward caching — all scoped to that frame.==
 
 #### Turbo Stream: One-Way DOM Update output only
 
@@ -45,7 +45,7 @@ From user interaction perspective, I think ==Turbo Stream is just about output==
 
 ### 3 Purposes
 
-Turbo Drive is for layout; Turbo Frame is for interactive parts; and Turbo Stream is for displaying parts. I think they can be aliased as Turbo Navigation, Turbo Interaction, and Turbo Display. ;-D
+==Turbo Drive is for layout; Turbo Frame is for interactive parts; and Turbo Stream is for displaying parts. I think they can be aliased as Turbo Navigation, Turbo Interaction, and Turbo Display. ;-D==
 
 #### Turbo Drive → Layout transitions
 
@@ -183,3 +183,221 @@ This gem provides a `turbo_stream_from` helper to create a turbo stream.
 <%# app/views/todos/show.html.erb %>
 <%= turbo_stream_from dom_id(@todo) %>
 ```
+
+Here’s a compact **Turbo (Drive/Frames/Streams) attribute cheat sheet** you can keep open while you build BOS. It’s grouped by where each attribute is valid.
+
+## Turbo attributes
+
+### `<turbo-frame>` element's core attributes
+
+These are **native to the Turbo library** (defined in turbo.es2017.js), and work in all Rails 7/8 apps.
+
+#### `id`
+
+Uniquely identifies the frame and becomes its navigation target. Required.
+
+Values: string
+
+```html
+<turbo-frame id="main-frame">
+```
+
+#### `src`
+
+Automatically loads remote content into the frame, like an `iframe.
+
+Values: URL
+
+```html
+<turbo-frame id="details" src="/products/1">
+```
+
+#### `target`
+
+Sets default target for navigation triggered by **the links or forms inside this frame**.
+
+Values: a frame's id or `_top` which means navigate the whole page.
+
+```html    
+<turbo-frame id="details" target="_top">
+```
+
+#### `disabled`
+
+Disables Turbo behavior for this frame. Frame becomes static. Prevents any Turbo navigation or replacement for this frame.
+
+Values: boolean  
+
+```html
+<turbo-frame id="details" disabled>
+```
+
+#### `loading`
+
+Controls when Turbo loads a remote src. 
+
+Values: `eager` (default), or `lazy` which means waits until visible.  
+
+```html
+<turbo-frame id="comments" src="/comments" loading="lazy">
+    
+<turbo-frame id="comments" src="/posts/1/comments" loading="lazy">Loading comments…</turbo-frame>
+```
+
+#### `data-turbo-cache="false"`
+
+Disables Turbo’s cache for a specific frame or page.
+
+Values: boolean
+
+```html
+<turbo-frame id="details" data-turbo-cache="false">
+```
+
+#### `data-turbo-temporary`
+
+Marks a frame whose contents may be replaced without caching. Rarely used.
+
+Values: boolean
+
+```html
+<turbo-frame id="preview" data-turbo-temporary>
+```
+
+### Automatically managed attributes
+
+Turbo adds/removes these dynamically. Managed by Turbo JS.
+
+#### `busy`
+
+Added automatically while Turbo is fetching remote content.  
+
+```html
+<turbo-frame id="details" busy>
+```
+
+#### `complete`
+
+Added when frame finishes loading (rare).
+
+#### `reloading`
+
+Indicates frame is being re-rendered via Turbo navigation.
+
+#### `aria-busy`
+
+Often mirrored from busy for accessibility.
+
+### Link or form attributes (tell Turbo where/how to navigate)
+
+These don’t belong to the `<turbo-frame>` tag itself, but control how Turbo Drive interacts with it.
+
+#### `data-turbo`
+
+Enables or disables Turbo behavior. 
+
+Applies to any element  
+
+Values: `true` | `false`
+
+```erb
+<form data-turbo="false">
+```
+
+#### ==`data-turbo-frame`==
+
+Specifies which frame the navigation should target.
+
+Values: frame id \| `_top`
+
+```erb
+<a href="/products/1" data-turbo-frame="main-frame">
+```
+
+#### `data-turbo-preserve-scroll`
+
+Keep scroll position or prevent scroll reset after navigation. Applies to `<a>` or `<form>`. (boolean)
+
+```erb
+<a href="/feed" data-turbo-preserve-scroll>
+```
+
+#### `data-turbo-action`
+
+Controls how Turbo updates history/scroll. 
+Applies to `<a>` or `<form>`.
+
+Values: `advance` or `replace`.
+
+```erb
+<a href="/products" data-turbo-action="replace">
+```
+
+#### `data-turbo-method`
+
+Send non-GET over a link (Rails UJS replacement). Applies to `<a>`.
+
+Values: post \| patch \| put \| delete  
+
+### Lifecycle / progressive enhancement data attributes
+
+These are advanced attributes used by the Turbo JS runtime.
+
+#### `data-turbo-permanent`
+
+Prevents element replacement between page loads (keeps same DOM node). Used for menus, shells, etc.
+
+Applies to any element.
+
+```html
+<div id="shell" data-turbo-permanent>
+<!-- Permanent shell layout -->
+```
+
+#### `data-turbo-track`
+
+Tells Turbo to reload the page when asset changes.
+
+Applies to `<link>` or `<script>`.
+
+Values: `reload`
+
+```html
+<link rel="stylesheet" href="/app.css" data-turbo-track="reload">
+```
+
+#### `data-turbo-preload`
+
+Used with `<link rel="preload">` for early Turbo resource loading.
+
+```html
+<link rel="modulepreload" href="/turbo" data-turbo-preload>
+```
+
+### Useful JS hooks (programmatic navigation)
+
+Navigate whole page (Drive):
+
+```js
+Turbo.visit("/products")
+```
+
+Navigate a frame:
+
+```js
+Turbo.visit("/products", { frame: "main-body-frame" })
+```
+
+Set a frame source directly:
+
+```js
+document.getElementById("main-body-frame")?.setAttribute("src", "/products")
+```
+
+### Turbo Streams (for completeness)
+
+| **Element**    | **Attribute**     | **Values**                                        | **What it does**                   |
+| -------------- | ----------------- | ------------------------------------------------- | ---------------------------------- |
+| <turbo-stream> | action            | append prepend replace update remove before after | What mutation to perform           |
+| <turbo-stream> | target \| targets | id \| CSS selector                                | Where to apply the action          |
+| <template>     | —                 | —                                                 | The HTML payload to insert/replace |

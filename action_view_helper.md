@@ -96,7 +96,7 @@ To summarize:
 
 This is why you can call capture directly in your ERB templates without specifying an object—it’s already part of the view’s context.
 
-### `<% content_for :title, "Products" %>`
+### `<% content_for %>`
 
 `content_for` is a method of `ActionView::Helpers::CaputureHelper` ==for child views to inject content into parent layouts== at specific locations.
 
@@ -104,7 +104,7 @@ This is why you can call capture directly in your ERB templates without specifyi
 <% content_for :title, "Products" %>
 ```
 
-It is used to set the page title dynamically in Rails views. It stores content("Products") in a named block (`:title`), and makes it available to the layout template, therefore allows each page to set its own title.
+It is used to set the page title dynamically in Rails views. It stores content("Products") i==n a named block (`:title`)==, and makes it available to the layout template, therefore allows each page to set its own title.
 
 In the view (e.g., `products/index.html.erb`):
 
@@ -138,3 +138,12 @@ Common use cases include:
 	<script>...</script>
 <% end %>
 ```
+
+
+
+#### content_for 的用途顯然不止這些。
+
+```ruby
+<%= content_for?(:menu_body) ? yield(:menu_body) : render("shell/menu_body") %>
+```
+

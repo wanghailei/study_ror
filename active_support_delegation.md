@@ -1,41 +1,41 @@
 # Delegation 委託別人代為執行
 
-`ActiveSupport::Delegation` in Rails provides a concise way ==to delegate **method calls** to associated objects==, enhancing code readability. This feature enables developers to forward method calls to associated objects, such as delegating a `name` method from a `Profile` model to a `User` model, allowing `user.name` instead of `user.profile.name`. 
+`ActiveSupport::Delegation` in Rails provides a concise way ==to delegate method calls to associated objects==, enhancing code readability. This feature enables developers to forward method calls to associated objects, such as delegating a `name` method from a `Profile` model to a `User` model, allowing `user.name` instead of `user.profile.name`. 
 
 For example:
 
 ```ruby
 # db/migrate/20240501000001_create_users.rb
 class CreateUsers < ActiveRecord::Migration[8.1]
-  def change
-    create_table :users do |t|
-      t.string :email
-      t.string :password_digest
-      t.string :username
-      t.boolean :admin, default: false
-      
-      t.timestamps
+    def change
+        create_table :users do |t|
+            t.string :email
+            t.string :password_digest
+            t.string :username
+            t.boolean :admin, default: false
+
+            t.timestamps
+        end
     end
-  end
 end
 
 # db/migrate/20240501000002_create_profiles.rb
 class CreateProfiles < ActiveRecord::Migration[8.1]
-  def change
-    create_table :profiles do |t|
-      t.references :user, foreign_key: true
-      
-      t.string :first_name
-      t.string :last_name
-      t.date :date_of_birth
-      t.string :bio
-      t.string :location
-      t.string :avatar_url
-      t.string :phone_number
-      
-      t.timestamps
+    def change
+        create_table :profiles do |t|
+            t.references :user, foreign_key: true
+
+            t.string :first_name
+            t.string :last_name
+            t.date :date_of_birth
+            t.string :bio
+            t.string :location
+            t.string :avatar_url
+            t.string :phone_number
+
+            t.timestamps
+        end
     end
-  end
 end
 ```
 
@@ -44,16 +44,16 @@ Without delegation, you'd need to write many forwarding methods:
 ```ruby
 # app/models/user.rb
 class User < ApplicationRecord
-  has_one :profile, dependent: :destroy
+	has_one :profile, dependent: :destroy
   
-  # Lots of manual forwarding methods
-  def first_name
-    profile&.first_name
-  end
+	# Lots of manual forwarding methods
+    def first_name
+    	profile&.first_name
+    end
   
-  def first_name=(value)
-    profile_or_build.first_name = value
-  end
+    def first_name=(value)
+    	profile_or_build.first_name = value
+    end
   
   def last_name
     profile&.last_name
@@ -79,24 +79,24 @@ class User < ApplicationRecord
     profile_or_build.bio = value
   end
   
-  def full_name
-    if first_name.present? || last_name.present?
-      "#{first_name} #{last_name}".strip
-    else
-      username
+    def full_name
+        if first_name.present? || last_name.present?
+        	"#{first_name} #{last_name}".strip
+        else
+        	username
+        end
     end
-  end
   
-  private
+	private
   
-  def profile_or_build
-    profile || build_profile
-  end
+    def profile_or_build
+    	profile || build_profile
+    end
 end
 
 # app/models/profile.rb
 class Profile < ApplicationRecord
-  belongs_to :user
+	belongs_to :user
 end
 ```
 
@@ -105,42 +105,41 @@ With delegation, this becomes:
 ```ruby
 # app/models/user.rb
 class User < ApplicationRecord
-  has_one :profile, dependent: :destroy
+	has_one :profile, dependent: :destroy
   
-  # Clean, DRY delegation of methods to profile
-  delegate :first_name, :last_name, :date_of_birth, :bio, 
-           :location, :avatar_url, :phone_number,
-           to: :profile_or_build, allow_nil: true
+    # Clean, DRY delegation of methods to profile
+	delegate :first_name, :last_name, :date_of_birth, :bio, :location, :avatar_url, :phone_number,
+		to: :profile_or_build, allow_nil: true
            
-  # Automatically delegates getters AND setters
-  delegate :first_name=, :last_name=, :date_of_birth=, :bio=,
-           :location=, :avatar_url=, :phone_number=,
-           to: :profile_or_build
+	# Automatically delegates getters AND setters
+	delegate :first_name=, :last_name=, :date_of_birth=, :bio=, :location=, :avatar_url=, :phone_number=,
+		to: :profile_or_build
   
-  def full_name
-    if first_name.present? || last_name.present?
-      "#{first_name} #{last_name}".strip
-    else
-      username
+    def full_name
+        if first_name.present? || last_name.present?
+	        "#{first_name} #{last_name}".strip
+        else
+	        username
+        end
     end
-  end
   
-  private
+	private
   
-  def profile_or_build
-    profile || build_profile
-  end
+    def profile_or_build
+	    profile || build_profile
+    end
 end
 
 # app/models/profile.rb
 class Profile < ApplicationRecord
-  belongs_to :user
-  
-  def age
-    return nil unless date_of_birth
-    ((Time.current.to_date - date_of_birth) / 365.25).to_i
-  end
+    belongs_to :user
+
+    def age
+        return nil unless date_of_birth
+        ((Time.current.to_date - date_of_birth) / 365.25).to_i
+    end
 end
+
 ```
 
 

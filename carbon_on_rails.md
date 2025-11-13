@@ -165,6 +165,50 @@ appname/app/assets/fonts/IBMPlexMono-Regular.woff2 # 字體文件。
 }
 ```
 
+### Type styles
+
+% Carbon has no dedicated type.css file. I have to code them myself, with ChatGPT's help. These code works quite well.
+
+```css
+/* Utility classes */
+.cds--type-body-01{font-family:var(--cds-font-sans);font-weight:var(--cds-font-weight-regular);font-size:var(--cds-body-01-font-size);line-height:var(--cds-body-01-line-height);letter-spacing:var(--cds-body-01-letter-spacing)}
+.cds--type-body-02{font-family:var(--cds-font-sans);font-weight:var(--cds-font-weight-regular);font-size:var(--cds-body-02-font-size);line-height:var(--cds-body-02-line-height);letter-spacing:var(--cds-body-02-letter-spacing)}
+
+.cds--type-heading-01{font-family:var(--cds-font-sans);font-weight:var(--cds-heading-01-weight);font-size:var(--cds-heading-01-font-size);line-height:var(--cds-heading-01-line-height);letter-spacing:var(--cds-heading-01-letter-spacing)}
+.cds--type-heading-02{font-family:var(--cds-font-sans);font-weight:var(--cds-heading-02-weight);font-size:var(--cds-heading-02-font-size);line-height:var(--cds-heading-02-line-height);letter-spacing:var(--cds-heading-02-letter-spacing)}
+.cds--type-heading-03{font-family:var(--cds-font-sans);font-weight:var(--cds-heading-03-weight);font-size:var(--cds-heading-03-font-size);line-height:var(--cds-heading-03-line-height);letter-spacing:var(--cds-heading-03-letter-spacing)}
+.cds--type-heading-04{font-family:var(--cds-font-sans);font-weight:var(--cds-heading-04-weight);font-size:var(--cds-heading-04-font-size);line-height:var(--cds-heading-04-line-height);letter-spacing:var(--cds-heading-04-letter-spacing)}
+.cds--type-heading-05{font-family:var(--cds-font-sans);font-weight:var(--cds-heading-05-weight);font-size:var(--cds-heading-05-font-size);line-height:var(--cds-heading-05-line-height);letter-spacing:var(--cds-heading-05-letter-spacing)}
+.cds--type-heading-06{font-family:var(--cds-font-sans);font-weight:var(--cds-heading-06-weight);font-size:var(--cds-heading-06-font-size);line-height:var(--cds-heading-06-line-height);letter-spacing:var(--cds-heading-06-letter-spacing)}
+.cds--type-heading-07{font-family:var(--cds-font-sans);font-weight:var(--cds-heading-07-weight);font-size:var(--cds-heading-07-font-size);line-height:var(--cds-heading-07-line-height);letter-spacing:var(--cds-heading-07-letter-spacing)}
+
+.cds--type-display-01{font-family:var(--cds-font-sans);font-weight:var(--cds-display-01-weight);font-size:var(--cds-display-01-font-size);line-height:var(--cds-display-01-line-height);letter-spacing:var(--cds-display-01-letter-spacing)}
+.cds--type-display-02{font-family:var(--cds-font-sans);font-weight:var(--cds-display-02-weight);font-size:var(--cds-display-02-font-size);line-height:var(--cds-display-02-line-height);letter-spacing:var(--cds-display-02-letter-spacing)}
+.cds--type-display-03{font-family:var(--cds-font-sans);font-weight:var(--cds-display-03-weight);font-size:var(--cds-display-03-font-size);line-height:var(--cds-display-03-line-height);letter-spacing:var(--cds-display-03-letter-spacing)}
+
+.cds--type-label-01{font-family:var(--cds-font-sans);font-weight:var(--cds-label-01-weight);font-size:var(--cds-label-01-font-size);line-height:var(--cds-label-01-line-height);letter-spacing:var(--cds-label-01-letter-spacing)}
+.cds--type-label-02{font-family:var(--cds-font-sans);font-weight:var(--cds-label-02-weight);font-size:var(--cds-label-02-font-size);line-height:var(--cds-label-02-line-height);letter-spacing:var(--cds-label-02-letter-spacing)}
+.cds--type-helper-text-01{font-family:var(--cds-font-sans);font-weight:var(--cds-font-weight-regular);font-size:var(--cds-helper-text-01-font-size);line-height:var(--cds-helper-text-01-line-height);letter-spacing:var(--cds-helper-text-01-letter-spacing)}
+
+.cds--type-code-01{font-family:var(--cds-font-mono);font-weight:var(--cds-code-01-weight);font-size:var(--cds-code-01-font-size);line-height:var(--cds-code-01-line-height);letter-spacing:var(--cds-code-01-letter-spacing)}
+.cds--type-code-02{font-family:var(--cds-font-mono);font-weight:var(--cds-code-02-weight);font-size:var(--cds-code-02-font-size);line-height:var(--cds-code-02-line-height);letter-spacing:var(--cds-code-02-letter-spacing)}
+
+.cds--type-tight{line-height:1.2 !important}
+.cds--type-loose{line-height:1.7 !important}
+
+h1,.h1{font:var(--cds-heading-07-weight) var(--cds-heading-07-font-size)/var(--cds-heading-07-line-height) var(--cds-font-sans);letter-spacing:var(--cds-heading-07-letter-spacing)}
+h2,.h2{font:var(--cds-heading-06-weight) var(--cds-heading-06-font-size)/var(--cds-heading-06-line-height) var(--cds-font-sans);letter-spacing:var(--cds-heading-06-letter-spacing)}
+h3,.h3{font:var(--cds-heading-05-weight) var(--cds-heading-05-font-size)/var(--cds-heading-05-line-height) var(--cds-font-sans);letter-spacing:var(--cds-heading-05-letter-spacing)}
+h4,.h4{font:var(--cds-heading-04-weight) var(--cds-heading-04-font-size)/var(--cds-heading-04-line-height) var(--cds-font-sans);letter-spacing:var(--cds-heading-04-letter-spacing)}
+h5,.h5{font:var(--cds-heading-03-weight) var(--cds-heading-03-font-size)/var(--cds-heading-03-line-height) var(--cds-font-sans);letter-spacing:var(--cds-heading-03-letter-spacing)}
+h6,.h6{font:var(--cds-heading-02-weight) var(--cds-heading-02-font-size)/var(--cds-heading-02-line-height) var(--cds-font-sans);letter-spacing:var(--cds-heading-02-letter-spacing)}
+
+```
+
+
+
+
+
 ## 集成 Carbon icons
 
 

@@ -17,7 +17,7 @@ You can `include` a module within a class definition. When this happens, all the
 
 ## `extend` and `include`
 
-These are two different ways to add module functionality to classes, but they target different levels. When `extend` a module in a class, the module's methods are added as class methods of the target class. When `include` a module into a class, the module's methods are added as instance methods of the class.
+These are two different ways to add module functionality to classes, but they target different levels. ==When `extend` a module in a class, the module's methods are added as **class methods** of the target class. When `include` a module into a class, the module's methods are added as **instance methods** of the class.==
 
 ### Include for instance methods
 
@@ -89,3 +89,4 @@ MyModule::MySubModule.do_something
 
 
 
+From a Ruby VM point of view, there is no significant difference between a class with dozens of included modules and a class that has the same code inlined. Private methods are not private to other included concerns.

@@ -115,9 +115,9 @@ end
 broadcast { puts "Explicit block called" }
 ```
 
-Notice the `&work` paramete. That’s how you ==define the block’s name==!
+Notice the `&work` parameter. That’s how you ==define the block’s name==!
 
-## The Ampersand `&` Operator
+## The `&` Operator - Convert it to a Proc/Block
 
 `[2, 4, 6].select!( &:even? )` is equivalent to `[2, 4, 6].select! { |i| i.even? }`
 
@@ -129,7 +129,7 @@ The `&:even?` is shorthand for a block `{ |i| i.even? }`.
 
 Since `!` is used after `select`, it modifies the original array itself.
 
-The `&` operator in Ruby is quite versatile and serves different purposes depending on the context, particularly when dealing with blocks, Procs, and methods.
+The ampersand `&` operator in Ruby is quite versatile and serves different purposes depending on the context, particularly when dealing with blocks, Procs, and methods.
 
 ### 1. Converting Blocks to Procs and Vice Versa
 
@@ -189,7 +189,7 @@ In this example, `method_obj` (a `Method` object) is converted to a block and pa
 [1, 2, 3].map &:to_s
 ```
 
-In this case, `&:to_s` converts the `:to_s` symbol to a `Proc` that calls the `to_s` method on every object in the array.
+In this case, ==`&:to_s` converts the `:to_s` symbol to a `Proc` that calls the `to_s` method on every object in the array.==
 
 #### A real-world example
 

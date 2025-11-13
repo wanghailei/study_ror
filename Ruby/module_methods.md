@@ -1,4 +1,4 @@
-# Modules Methods
+# Module Methods
 
 Ruby modules can have both module methods and instance methods, just like classes. This dual nature is what makes modules versatile in Ruby.
 

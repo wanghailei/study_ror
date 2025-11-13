@@ -1,18 +1,22 @@
 # Active Record Validations
 
-This guide teaches you how to validate the state of objects before they go into the database using Active Record's validations feature.
+## Active Record and Referential Integrity
 
-## 1 Validations Overview
+==**The Active Record way claims that intelligence belongs in your models, not in the database.** As such, features such as triggers or constraints, which push some of that intelligence back into the database, are not recommended.==
+
+Validations such as `validates :foreign_key`, `uniqueness: true` are one way in which models can enforce data integrity. The `:dependent` option on associations allows models to automatically destroy child objects when the parent is destroyed. Like anything which operates at the application level, these cannot guarantee referential integrity and so some people augment them with foreign key constraints in the database.
+
+## Validations Overview
 
 Here's an example of a very simple validation:
 
-```
+```ruby
 class Person < ApplicationRecord
-  validates :name, presence: true
+	validates :name, presence: true
 end
 ```
 
-```
+```ruby
 irb> Person.create(name: "John Doe").valid?
 => true
 irb> Person.create(name: nil).valid?
@@ -21,9 +25,7 @@ irb> Person.create(name: nil).valid?
 
 As you can see, our validation lets us know that our `Person` is not valid without a `name` attribute. The second `Person` will not be persisted to the database.
 
-Before we dig into more details, let's talk about how validations fit into the big picture of your application.
-
-### 1.1 Why Use Validations?
+### Why Use Validations?
 
 Validations are used to ensure that only valid data is saved into your database. For example, it may be important to your application to ensure that every user provides a valid email address and mailing address. Model-level validations are the best way to ensure that only valid data is saved into your database. They are database agnostic, cannot be bypassed by end users, and are convenient to test and maintain. Rails provides built-in helpers for common needs, and allows you to create your own validation methods as well.
 
@@ -196,7 +198,7 @@ Copy
 
 We'll cover validation errors in greater depth in the [Working with Validation Errors](https://guides.rubyonrails.org/active_record_validations.html#working-with-validation-errors) section.
 
-## [2 Validation Helpers](https://guides.rubyonrails.org/active_record_validations.html#validation-helpers)
+## Validation Helpers
 
 Active Record offers many pre-defined validation helpers that you can use directly inside your class definitions. These helpers provide common validation rules. Every time a validation fails, an error is added to the object's `errors` collection, and this is associated with the attribute being validated.
 
@@ -206,107 +208,89 @@ All of them accept the `:on` and `:message` options, which define when the valid
 
 To see a list of the available default helpers, take a look at[`ActiveModel::Validations::HelperMethods`](https://api.rubyonrails.org/v7.1.3/classes/ActiveModel/Validations/HelperMethods.html).
 
-### [2.1 `acceptance`](https://guides.rubyonrails.org/active_record_validations.html#acceptance)
+### `acceptance`
 
 This method validates that a checkbox on the user interface was checked when a form was submitted. This is typically used when the user needs to agree to your application's terms of service, confirm that some text is read, or any similar concept.
 
-```
+```ruby
 class Person < ApplicationRecord
-  validates :terms_of_service, acceptance: true
+	validates :terms_of_service, acceptance: true
 end
 ```
-
-Copy
 
 This check is performed only if `terms_of_service` is not `nil`. The default error message for this helper is *"must be accepted"*. You can also pass in a custom message via the `message` option.
 
-```
+```ruby
 class Person < ApplicationRecord
-  validates :terms_of_service, acceptance: { message: 'must be abided' }
+	validates :terms_of_service, acceptance: { message: 'must be abided' }
 end
 ```
-
-Copy
 
 It can also receive an `:accept` option, which determines the allowed values that will be considered as acceptable. It defaults to `['1', true]` and can be easily changed.
 
-```
+```ruby
 class Person < ApplicationRecord
-  validates :terms_of_service, acceptance: { accept: 'yes' }
-  validates :eula, acceptance: { accept: ['TRUE', 'accepted'] }
+    validates :terms_of_service, acceptance: { accept: 'yes' }
+    validates :eula, acceptance: { accept: ['TRUE', 'accepted'] }
 end
 ```
 
-Copy
+==This validation is very specific to web applications and this 'acceptance' does not need to be recorded anywhere in your database.== If you don't have a field for it, the helper will create a virtual attribute. If the field does exist in your database, the `accept` option must be set to or include `true` or else the validation will not run.
 
-This validation is very specific to web applications and this 'acceptance' does not need to be recorded anywhere in your database. If you don't have a field for it, the helper will create a virtual attribute. If the field does exist in your database, the `accept` option must be set to or include `true` or else the validation will not run.
-
-### [2.2 `confirmation`](https://guides.rubyonrails.org/active_record_validations.html#confirmation)
+### `confirmation`
 
 You should use this helper when you have two text fields that should receive exactly the same content. For example, you may want to confirm an email address or a password. This validation creates a virtual attribute whose name is the name of the field that has to be confirmed with "_confirmation" appended.
 
-```
+```ruby
 class Person < ApplicationRecord
-  validates :email, confirmation: true
+	validates :email, confirmation: true
 end
 ```
 
-Copy
-
 In your view template you could use something like
 
-```
+```erb
 <%= text_field :person, :email %>
 <%= text_field :person, :email_confirmation %>
 ```
 
-Copy
+This check is performed only if `email_confirmation` is not `nil`. To require confirmation, make sure to add a presence check for the confirmation attribute:
 
-This check is performed only if `email_confirmation` is not `nil`. To require confirmation, make sure to add a presence check for the confirmation attribute (we'll take a look at `presence` [later](https://guides.rubyonrails.org/active_record_validations.html#presence) on in this guide):
-
-```
+```ruby
 class Person < ApplicationRecord
-  validates :email, confirmation: true
-  validates :email_confirmation, presence: true
+    validates :email, confirmation: true
+    validates :email_confirmation, presence: true
 end
 ```
-
-Copy
 
 There is also a `:case_sensitive` option that you can use to define whether the confirmation constraint will be case sensitive or not. This option defaults to true.
 
-```
+```ruby
 class Person < ApplicationRecord
-  validates :email, confirmation: { case_sensitive: false }
+	validates :email, confirmation: { case_sensitive: false } 
 end
 ```
 
-Copy
-
 The default error message for this helper is *"doesn't match confirmation"*. You can also pass in a custom message via the `message` option.
 
-Generally when using this validator, you will want to combine it with the `:if` option to only validate the "_confirmation" field when the initial field has changed and **not** every time you save the record. More on [conditional validations](https://guides.rubyonrails.org/active_record_validations.html#conditional-validation) later.
+Generally when using this validator, you will want to combine it with the `:if` option to only validate the "_confirmation" field when the initial field has changed and **not** every time you save the record.
 
-```
+```ruby
 class Person < ApplicationRecord
   validates :email, confirmation: true
   validates :email_confirmation, presence: true, if: :email_changed?
 end
 ```
 
-Copy
-
-### [2.3 `comparison`](https://guides.rubyonrails.org/active_record_validations.html#comparison)
+### `comparison`
 
 This check will validate a comparison between any two comparable values.
 
-```
+```ruby
 class Promotion < ApplicationRecord
-  validates :end_date, comparison: { greater_than: :start_date }
+	validates :end_date, comparison: { greater_than: :start_date }
 end
 ```
-
-Copy
 
 The default error message for this helper is *"failed comparison"*. You can also pass in a custom message via the `message` option.
 
@@ -321,20 +305,17 @@ These options are all supported:
 
 The validator requires a compare option be supplied. Each option accepts a value, proc, or symbol. Any class that includes Comparable can be compared.
 
-### [2.4 `format`](https://guides.rubyonrails.org/active_record_validations.html#format)
+### `format`
 
 This helper validates the attributes' values by testing whether they match a given regular expression, which is specified using the `:with` option.
 
-```
+```ruby
 class Product < ApplicationRecord
-  validates :legacy_code, format: { with: /\A[a-zA-Z]+\z/,
-    message: "only allows letters" }
+	validates :legacy_code, format: { with: /\A[a-zA-Z]+\z/, message: "only allows letters" }
 end
 ```
 
-Copy
-
-Inversely, by using the `:without` option instead you can require that the specified attribute does *not*match the regular expression.
+Inversely, by using the `:without` option instead you can require that the specified attribute does *not* match the regular expression.
 
 In either case, the provided `:with` or `:without` option must be a regular expression or a proc or lambda that return one.
 
@@ -342,24 +323,21 @@ The default error message is *"is invalid"*.
 
 use `\A` and `\z` to match the start and end of the string, `^` and `$` match the start/end of a line. Due to frequent misuse of `^` and `$`, you need to pass the `multiline: true`option in case you use any of these two anchors in the provided regular expression. In most cases, you should be using `\A` and `\z`.
 
-### [2.5 `inclusion`](https://guides.rubyonrails.org/active_record_validations.html#inclusion)
+### `inclusion`
 
 This helper validates that the attributes' values are included in a given set. In fact, this set can be any enumerable object.
 
-```
+```ruby
 class Coffee < ApplicationRecord
-  validates :size, inclusion: { in: %w(small medium large),
-    message: "%{value} is not a valid size" }
+	validates :size, inclusion: { in: %w(small medium large), message: "%{value} is not a valid size" }
 end
 ```
-
-Copy
 
 The `inclusion` helper has an option `:in` that receives the set of values that will be accepted. The `:in` option has an alias called `:within` that you can use for the same purpose, if you'd like to. The previous example uses the `:message` option to show how you can include the attribute's value. For full options please see the [message documentation](https://guides.rubyonrails.org/active_record_validations.html#message).
 
 The default error message for this helper is *"is not included in the list"*.
 
-### [2.6 `exclusion`](https://guides.rubyonrails.org/active_record_validations.html#exclusion)
+### `exclusion`
 
 The opposite of `inclusion` is... `exclusion`!
 

@@ -84,13 +84,13 @@ class Event < ApplicationRecord
 end
 ```
 
-A word of caution: It's easy to overdo a global singleton like Current and tangle your model as a result. ==Current should only be used for a few, top-level globals, like account, user, and request details.== The attributes stuck in Current should be used by more or less all actions on all requests. If you start sticking controller-specific attributes in there, you're going to create a mess.
+A word of caution: It's easy to overdo a global singleton like Current and tangle your model as a result. ==`Current` should only be used for a few, top-level globals, like account, user, and request details.== The attributes stuck in Current should be used by more or less all actions on all requests. If you start sticking controller-specific attributes in there, you're going to create a mess.
 
 ## Concern
 
-A concern in Rails is a module that allows you to extract common code from multiple models, controllers, or other classes into a reusable unit. Concerns are an implementation of the mixin pattern, built using Ruby modules, and are a core part of Rails' approach to code organization and reuse.
+==A concern in Rails is a module that allows you to extract common code from multiple models, controllers, or other classes into a reusable unit.== Concerns are an implementation of the mixin pattern, built using Ruby modules, and are a core part of Rails' approach to code organization and reuse.
 
-Concerns make large controllers or models easier to understand and manage. This also has the advantage of reusability when multiple models (or controllers) share the same concerns.
+==Concerns make large controllers or models easier to understand and manage.== This also has the advantage of reusability when multiple models (or controllers) share the same concerns.
 
 A concern is only responsible for a focused subset of the model's responsibility.
 
@@ -110,27 +110,27 @@ The `ActiveSupport::Concern` gives us a simpler way to include them.
 
 ```ruby
 module MyFeature
-  extend ActiveSupport::Concern
-  
-  included do
-    # Code that will run when the module is included
-    # Often contains class-level declarations like:
-    has_many :items
-    validates :name, presence: true
-    scope :active, -> { where(active: true) }
-  end
-  
-  # Instance methods for the concern
-  def some_instance_method
-    # method logic
-  end
-  
-  # Class methods can be defined in a nested module
-  module ClassMethods
-    def some_class_method
-      # method logic
+    extend ActiveSupport::Concern
+
+    included do
+        # Code that will run when the module is included
+        # Often contains class-level declarations like:
+        has_many :items
+        validates :name, presence: true
+        scope :active, -> { where(active: true) }
     end
-  end
+
+    # Instance methods for the concern
+    def some_instance_method
+    	# method logic
+    end
+
+    # Class methods can be defined in a nested module
+    module ClassMethods
+        def some_class_method
+        	# method logic
+        end
+    end
 end
 ```
 
@@ -138,12 +138,12 @@ end
 
 ```ruby
 class User < ApplicationRecord
-  include MyFeature
-  # Now User has all the functionality defined in MyFeature
+	include MyFeature
+	# Now User has all the functionality defined in MyFeature
 end
 ```
 
-## Common Use Cases
+### Common Use Cases
 
 1. **Authentication logic**: User authentication behaviors
 2. **Taggable models**: Adding tagging capabilities to different models
