@@ -162,6 +162,41 @@ Decorate links with both `data-turbo-confirm` and `data-turbo-method`, and confi
 
 Use `Turbo.config.forms.confirm = confirmMethod` to change the method that gets called for confirmation. The default is the browser’s built in `confirm`.
 
+## `data-turbo-permanent`
+
+==Turbo replaces the page contents without reloading the browser tab.== When Turbo performs a page visit, it fetches the new HTML in the background, parses it, and then swaps the document’s <body> with the <body> from the new response. This is the standard Turbo “full visit.”
+
+This feature allows a layout to behave like a persistent application shell. ==Without `data-turbo-permanent`, the entire DOM is replaced on every navigation==, so things like a left navigation menu would collapse, lose selection, and reinitialize every time you move to a different page. Carbon Web Components would fully reconstruct themselves and lose expanded states. Stimulus controllers on those nodes would disconnect and reconnect. With data-turbo-permanent, the exact node remains intact across navigations, so everything inside that element continues living as if the page never changed.
+
+In your BOS shell, the menu is precisely the kind of element that benefits from this. It contains a Carbon tree view that keeps interactive state (expanded nodes, selection, focus). You want this element to remain stable while the rest of the page changes via `Turbo.visit(route)`. By marking only the menu container as permanent, Turbo knows to preserve it and replace everything else. If you mark the entire shell permanent, then both the menu and the main content area become unreplaceable, so nothing changes during navigation. Therefore, the correct use is to apply `data-turbo-permanent` to the menu only, never to the whole shell.
+
+### Clarify
+
+`data-turbo-permanent` is a feature of **Turbo Drive**. It is not part of Turbo Frames or Turbo Streams. Turbo Frames and Turbo Streams do not need this mechanism, and only Turbo Drive uses it.
+
+`data-turbo-permanent` is a Turbo Drive feature (part of Hotwire), **not a Rails 8 feature**, although ==Rails 8 uses Turbo **by default.**== ==This behavior has nothing to do with Rails 8 itself.== Rails 8 includes Turbo by default, but Turbo Drive has operated this way since Rails 6 when Hotwire was introduced. 
+
+### What data-turbo-permanent actually does
+
+==Turbo performs *page navigation without reloading the browser tab*.== When you click a link or call `Turbo.visit("/products")`, Turbo:
+
+1. Fetches the new page HTML over AJAX.
+2. Parses the HTML.
+3. Replaces the <body> (or <turbo-frame> when frame navigation is used).
+4. Preserves elements marked data-turbo-permanent.
+
+During this replacement, everything inside the <body> is destroyed and rebuilt unless you explicitly tell Turbo to keep something. ==Elements marked with `data-turbo-permanent` are not replaced during navigation.== 
+
+Turbo preserves them exactly, with all their DOM state, event listeners, Shadow DOM state, Stimulus controllers, and user interaction state. Marking the element permanent means: “Turbo, never destroy this element; keep it alive across page navigations - reload.” Turbo will copy that exact DOM node — including its internal state, Shadow DOM, Stimulus controllers, and interaction state — from the old page to the new one, and it will discard the incoming version of that same element from the server’s HTML.
+
+### How Turbo chooses what to preserve
+
+Turbo compares the *current* DOM, and the *new* DOM returned by the server. For each permanent element, Turbo:
+
+1. Finds it by its DOM id and `data-turbo-permanent`
+2. Removes the matching element from the *incoming* HTML
+3. Reuses the existing element in the current DOM.
+
 ## Disabling Turbo Drive on Specific Links or Forms
 
 Turbo Drive can be disabled on a per-element basis by annotating the element or any of its ancestors with `data-turbo="false"`.

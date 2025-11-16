@@ -4,42 +4,27 @@ Carbon handles UI, and Rails handles navigation + data.
 
 ## Carbon's responsibility separation
 
-Carbon Web Components are **UI only**: styles, interaction, states, accessibility, animation, focus/keyboard handling. But **NOT**: navigation, data loading, Turbo frames, Turbo navigation, server interaction, routing, which are all **Rails responsibilities**.
+==Carbon Web Components are **UI and visual only**: styles, interaction, states, accessibility, animation, focus/keyboard handling. But **NOT**: navigation, routing, data loading==, Turbo frames, Turbo navigation, server interaction, which are all Rails responsibilities. This avoids all the Carbon internals that were causing the error and keeps BOS logic clean.
 
-For example: Carbon <cds-tree-node>s should:
+For example: Carbon `<cds-tree-node>`s should:
 
-- expand / collapse
-- highlight selection
-- play focus rings
-- animate
-- emit cds-tree-node-selected
+- expand, collapse, animate,
+- highlight selection, play focus rings,
+- emit events like cds-tree-node-selected
 
-But **none** of these should trigger page navigation. 
+But **none** of these should trigger page navigation. Rails/Stimulus should:
 
-Rails/Stimulus should:
+- capture cds-tree-node-selected, extract your own data-route, call `Turbo.visit("/products")`,
+- update the layout, and keep state.
 
-- capture cds-tree-node-selected
-- extract your own data-route
-- call Turbo.visit("/products")
-- update the layout
-- keep state
+### Avoids Carbon’s buggy `href` mode.
 
-This avoids all the Carbon internals that were causing the error and keeps BOS logic clean.
+Using `<cds-tree-node data-route="…">` solves all problems:
 
-#### Your new `<cds-tree-node data-route="…">` design is the correct pattern.
+- Avoids Carbon’s buggy href mode. ==No more shadow DOM anchor lookups==
+- Uses Rails routing 100% cleanly. Everything is Turbo-compatible
 
-It solves all problems:
-
-- Avoids Carbon’s buggy href mode.==No more shadow DOM anchor lookups==
-- Lets you use Rails routing 100% cleanly. Everything is Turbo-compatible
-
-You essentially treat Carbon WC as **visual components** — exactly the way they were meant to be used in a Rails app.
-
-
-
-## **✔ BOS Shell Architecture (what you now have)**
-
-
+## BOS Shell Architecture
 
 **MENU**
 
@@ -49,7 +34,7 @@ You essentially treat Carbon WC as **visual components** — exactly the way the
 
 **CONTENT**
 
-- Turbo loads the entire page (Turbo.visit)
+- ==Turbo loads the entire page (Turbo.visit)==
 - Layout re-renders new main content
 - \#menu survives because of data-turbo-permanent
 
@@ -64,8 +49,6 @@ You essentially treat Carbon WC as **visual components** — exactly the way the
 - No coupling with navigation logic
 
 This is a **beautiful architecture**: clean, layered, predictable, Rails-native, and 100% compatible with Carbon WC.
-
-
 
 ## Mapping rails view helpers to Carbon web components
 
@@ -120,7 +103,7 @@ This table includes the main helpers, with form helpers like `text_field_tag` us
 - **Accessibility**: Carbon components include built-in accessibility features, like labels for `<cds-text-input>`, which might differ from standard Rails, requiring adjustments in helper implementation, as noted in earlier discussions.
 - **Scalability**: The mappings cover common helpers, but for less frequent components, users can use `carbon_tag` directly, maintaining flexibility, as seen in the user’s previous approach.
 
-## My Experience
+### WHL Experience
 
 寫一個 `CarbonTagHelper` module，放在`config/initializers/carbon_tag_helper.rb`。在這裡面， override Rails form tags。有的容易覆蓋，有的不容易。
 
@@ -134,7 +117,7 @@ form 本身不能用 cds-form 替代，因為生成的DOM內在結構會無法�
 
 
 
-### collection_select and cds-select
+#### collection_select and cds-select
 
 
 

@@ -673,13 +673,79 @@ Then update show.turbo_stream.erb to:
 
 
 
+## `data-turbo-permanent` on `#shell` or `#menu`?
+
+The correct choice for BOS is to mark only the #menu as permanent. Marking the entire #shell as permanent breaks Turbo’s page-replacement model.
+
+### When data-turbo-permanent is on the shell element**
+
+
+
+Example structure:
+
+```erb
+<body>
+	<div id="shell" data-turbo-permanent>
+		<div id="menu"></div>
+		<div id="main"><%= yield %></div>
+	</div>
+</body>
+```
+
+How Turbo treats this on a full page visit:
+
+- Turbo fetches the new page HTML.
+- It looks for elements with the same id and data-turbo-permanent.
+- It finds the existing element with id shell and the new element with id shell.
+- It keeps the old element and discards the new one entirely.
+- Importantly: it keeps the entire subtree under the old shell. It does not replace the children with what came from the new response.
+
+Result:
+
+- The menu does not re-render (good for preserving menu state).
+- The main content inside shell also does not re-render (bad).
+- So after navigation, you will still see the old page’s main content, because Turbo never got a chance to replace it.
+
+==In other words, marking shell as permanent freezes both the menu and the main area. For full page visits, this makes the app look stuck on the old content.==
+
+
+
+### When data-turbo-permanent is on the menu element
+
+```erb
+<body>
+	<div id="shell">
+		<div id="menu" data-turbo-permanent></div>
+		<div id="main"><%= yield %></div>
+	</div>
+</body>
+```
+
+On a full page visit:
+
+- Turbo fetches new HTML.
+- It finds an element with id menu and data-turbo-permanent in the current DOM.
+- It finds the matching element in the new HTML.
+- It keeps the existing menu node (with its current DOM and state).
+- It discards the new menu element from the response.
+- Everything outside menu (including the main container and its contents) is replaced as usual.
 
 
 
 
 
+Result:
 
-Now we answer your exact question:
+
+
+- The menu is preserved across navigations. The Carbon tree and its expanded/selected state stay alive.
+- The main content is replaced by the new page’s yield, which is what you want when you call Turbo.visit(route) from navigateMain.
+
+
+
+
+
+This is the sweet spot: the menu is stable; the rest of the page remains dynamic.
 
 
 
@@ -689,7 +755,58 @@ Now we answer your exact question:
 
 
 
-# **⭐** 
+## **Which one to use in your BOS shell**
+
+
+
+
+
+Given your design:
+
+
+
+- Navigation is full page via Turbo.visit(route).
+- You want Carbon components for look and feel and interaction.
+- You want Rails and Turbo to fully own navigation and data.
+
+
+
+
+
+The correct choice is:
+
+
+
+- data-turbo-permanent on the menu container (id menu).
+- No data-turbo-permanent on the shell container (id shell).
+
+
+
+
+
+So:
+
+```
+<div id="shell" data-controller="shell">
+	<div id="menu" data-turbo-permanent>
+		<%= render "shell/menu" %>
+	</div>
+
+	<div id="main">
+		<%= yield %>
+	</div>
+</div>
+```
+
+This keeps the Carbon tree view stable and fully under your Stimulus control, while letting Turbo and Rails re-render the main area on every visit.
+
+
+
+If you paste your current layout snippet, I can mark exactly where to place data-turbo-permanent and where not to. 
+
+
+
+⭐**
 
 # **What does a \*.turbo_stream.erb wire?**
 
