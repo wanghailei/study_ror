@@ -5,22 +5,22 @@ A **pure** structure for products that matches your philosophy:
 **`Controller`**:
 
 - Only knows “what happened” (save success, validation failure, destroyed, etc.).
+
 - Only does respond_to do |format| format.html / format.turbo_stream end.
+
 - only data + respond_to do |format|
+
 - No turbo_frame_request? in controllers
-- No dom_id in controllers
-- All UI wiring (which frame / which id) lives in *.turbo_stream.erb
+
 - No UI ids, no frame names, no partial wiring.
 
-**`*.turbo_stream.erb`**:
+	
+
+	All UI wiring (which frame / which id) lives in **`*.turbo_stream.erb`**:
 
 - Knows the DOM structure and frames.
 - Decides which element (products-table, product-123, side-body-frame, side-neck) gets updated.
 - Branches on @product.errors.any? to choose error vs success UI.
-
-Below is a complete structure with comments in every file so Future-You remembers why each thing exists.
-
-
 
 ## The core mental model
 

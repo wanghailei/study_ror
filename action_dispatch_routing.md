@@ -2,11 +2,24 @@
 
 The core router in Rails is `ActionDispatch::Journey::Router`, used via `ActionDispatch::Routing::RouteSet` to dispatch requests.
 
-## 1. The Purpose of the Rails Router
 
-The Rails router matches incoming HTTP requests to specific controller actions in your Rails application based on the URL path. (It can also forward to a [Rack](https://edgeguides.rubyonrails.org/rails_on_rack.html) application.) ==The router also generates path and URL helpers based on the resources configured in the router.==
 
-### 1.1. Routing Incoming URLs to Code
+### Routes
+
+
+
+## The Purpose of the Rails Router
+
+Routes' primary purpose is to connect view to controller, and they also serve as a UI element--URL. The Rails router matches incoming HTTP requests to specific controller actions in your Rails application based on the URL path. It can also forward to a [Rack](https://edgeguides.rubyonrails.org/rails_on_rack.html) application. ==The router also generates path and URL helpers based on the resources configured in the router.==
+
+### Routing Rules
+
+1. Always use canonical routes that conform to Rails’ defaults.
+2. User-friendly URLs should be added in addition to the canonical routes.
+3. Avoid custom actions in favour of creating new resources that use Rails’ default actions.
+4. ==Using resources to define routes: `resources :widgets`. It's the best way.==
+
+### Routing Incoming URLs to Code
 
 When your Rails application receives an incoming request, it asks the router to match it to a controller action (aka method). For example, take the following incoming request:
 
@@ -30,7 +43,7 @@ get "/users/:id", controller: "users", action: :show
 
 Rails uses snake_case for controller names when specifying routes. For example, if you have a controller named `UserProfilesController`, you would specify a route to the show action as `user_profiles#show`.
 
-### 1.2. Generating Paths and URLs from Code\
+### Generating Paths and URLs from Code
 
 ==The Router automatically generates path and URL helper methods== for your application. With these methods you can avoid hard-coded path and URL strings.
 
@@ -58,23 +71,21 @@ The router will generate the path `/users/17` from `user_path(@user)`. Using the
 
 It also generates `user_url`, which has a similar purpose. ==While `user_path` generates a relative URL like `/users/17`, `user_url` generates an absolute URL such as `https://example.com/users/17`== in the above example.
 
-### 1.3. Configuring the Rails Router
+### Configuring the Rails Router
 
 Routes live in `config/routes.rb`. Here is an example of what routes look like in a typical Rails application. The sections that follow will explain the different route helpers used in this file:
 
-```
+```ruby
 Rails.application.routes.draw do
-  resources :brands, only: [:index, :show] do
-    resources :products, only: [:index, :show]
-  end
+    resources :brands, only: [:index, :show] do
+    	resources :products, only: [:index, :show]
+    end
 
-  resource :basket, only: [:show, :update, :destroy]
+    resource :basket, only: [:show, :update, :destroy]
 
-  resolve("Basket") { route_for(:basket) }
+    resolve("Basket") { route_for(:basket) }
 end
 ```
-
-
 
 Since this is a regular Ruby source file, you can use all of Ruby's features (like conditionals and loops) to help you define your routes.
 
@@ -82,7 +93,7 @@ The `Rails.application.routes.draw do ... end` block that wraps your route defin
 
 Be careful with variable names in `routes.rb` as they can clash with the DSL methods of the router.
 
-## 2. Resource Routing: the Rails Default
+## Resource Routing: the Rails Default
 
 Resource routing allows you to quickly declare all of the common routes for a given resource controller. For example, a single call to method `resources` declares all of the necessary routes for the `index`, `show`, `new`, `edit`, `create`, `update`, and `destroy` actions, without you having to declare each route separately.
 

@@ -1,5 +1,78 @@
 # Using Carbon in Rails 8
 
+## Carbon's responsibility separation
+
+Carbon handles UI, and Rails handles navigation + data. Carbon Web Components are **UI only**: styles, interaction, states, accessibility, animation, focus/keyboard handling. But **NOT**: navigation, data loading, Turbo frames, Turbo navigation, server interaction, routing, which are all **Rails responsibilities**.
+
+For example: Carbon <cds-tree-node>s should:
+
+- expand / collapse
+- highlight selection
+- play focus rings
+- animate
+- emit cds-tree-node-selected
+
+But **none** of these should trigger page navigation. 
+
+Rails/Stimulus should:
+
+- capture cds-tree-node-selected
+- extract your own data-route
+- call Turbo.visit("/products")
+- update the layout
+- keep state
+
+This avoids all the Carbon internals that were causing the error and keeps BOS logic clean.
+
+#### Your new `<cds-tree-node data-route="…">` design is the correct pattern.
+
+It solves all problems:
+
+- Avoids Carbon’s buggy href mode.==No more shadow DOM anchor lookups==
+- Lets you use Rails routing 100% cleanly. Everything is Turbo-compatible
+
+You essentially treat Carbon WC as **visual components** — exactly the way they were meant to be used in a Rails app.
+
+
+
+------
+
+
+
+
+
+# **✔ BOS Shell Architecture (what you now have)**
+
+
+
+
+
+**MENU**
+
+- Carbon <cds-tree-view> purely UI
+- <cds-tree-node data-route="/products">
+- Stimulus navigateMain listens for Carbon events
+
+**CONTENT**
+
+- Turbo loads the entire page (Turbo.visit)
+- Layout re-renders new main content
+- \#menu survives because of data-turbo-permanent
+
+**SIDE PANEL**
+
+- Controlled fully by Stimulus (showSide, hideSide)
+- Not affected by navigation frames
+
+**UI SHELL**
+
+- Carbon for interaction / styling
+- No coupling with navigation logic
+
+This is a **beautiful architecture**: clean, layered, predictable, Rails-native, and 100% compatible with Carbon WC.
+
+
+
 ## 集成 Carbon Web Components
 
 #### Step 1: 導入 web components .js 文件。
@@ -412,3 +485,4 @@ Quick check list
 	•	Ensure every real option becomes <cds-select-item value="…">Label</cds-select-item>.
 
 This matches Carbon’s Web Components usage where placeholder is supported on <cds-select>.  ￼
+

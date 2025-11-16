@@ -89,3 +89,6 @@ In this way, the Controller acts as a kind of director, deciding when and how th
 
 
 
+
+
+[Deepwiki for Rails](https://deepwiki.com/rails/rails)

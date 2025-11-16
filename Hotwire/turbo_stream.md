@@ -85,7 +85,7 @@ A Turbo Streams message is a fragment of HTML consisting of `<turbo-stream>` ele
 <turbo-stream action="refresh" request-id="abcd-1234"></turbo-stream>
 ```
 
-Note that every `<turbo-stream>` element must wrap its included HTML inside a `<template>` element.
+Note that ==every `<turbo-stream>` element must wrap its included HTML inside a `<template>` element.==
 
 A Turbo Stream can integrate with any element in the document that can be resolved by an [id](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/id) attribute or [CSS selector](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors)(with the exception of `<template>` element or `<iframe>` element content). It is not necessary to change targeted elements into `elements`. If your application utilizes `<turbo-frame>` elements for the sake of a `<turbo-stream>` element, change the `<turbo-frame>` into another [built-in element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element).
 
@@ -190,7 +190,7 @@ The same is especially true for WebSocket updates. On poor connections, or if th
 
 ## [﹟](https://turbo.hotwired.dev/handbook/streams#but-what-about-running-javascript%3F)But What About Running JavaScript?
 
-Turbo Streams consciously restricts you to nine actions: append, prepend, (insert) before, (insert) after, replace, update, remove, morph, and refresh. If you want to trigger additional behavior when these actions are carried out, you should attach behavior using [Stimulus](https://stimulus.hotwired.dev/) controllers. This restriction allows Turbo Streams to focus on the essential task of delivering HTML over the wire, leaving additional logic to live in dedicated JavaScript files.
+==Turbo Streams consciously restricts you to nine actions: append, prepend, (insert) before, (insert) after, replace, update, remove, morph, and refresh.== If you want to trigger additional behavior when these actions are carried out, you should attach behavior using [Stimulus](https://stimulus.hotwired.dev/) controllers. This restriction allows Turbo Streams to focus on the essential task of delivering HTML over the wire, leaving additional logic to live in dedicated JavaScript files.
 
 Embracing these constraints will keep you from turning individual responses into a jumble of behaviors that cannot be reused and which make the app hard to follow. The key benefit from Turbo Streams is the ability to reuse templates for initial rendering of a page through all subsequent updates.
 
