@@ -382,8 +382,6 @@ It's important to ensure that the newer Bundler version is compatible with your 
 	bundle _2.5.5_ install
 	```
 
-
-
 Use the Terminal commands only **insde a Rails app's directory**. Otherwise, the commands work on the Rails on your system instead of the Rails used by a certain app.
 
 ### Verify the Rails version of an app

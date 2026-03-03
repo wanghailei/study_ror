@@ -1,5 +1,31 @@
 # Turbo Stream "Strategy"
 
+
+
+
+
+## Codex suggested using .turbo_stream.erb for view orchestration.
+
+
+
+**Recommendation First**
+Keep using .turbo_stream.erb files for BOS.
+Given your 3-panel shell (main/side/more) and multi-target UI updates, templates are the right place for view orchestration. Keep controllers thin.
+
+Use this rule:
+
+1. ==Use .turbo_stream.erb when an action updates multiple targets or has success/error UI branches.==
+2. ==Use `render turbo_stream` in controller only for trivial single-target updates.==
+3. Keep business/domain logic out of both controllers and stream templates.
+
+
+
+---
+
+
+
+
+
 Key rules you just stated (I’ll follow them strictly):
 
 1. **Controller does not wire UI**
@@ -23,8 +49,82 @@ Key rules you just stated (I’ll follow them strictly):
 
 	
 
-	## Architecture
+	## Use Frame or Stream?
 
+	
+
+	> <%= link_to "Edit", edit_product_path(product), data: { turbo_frame: dom_id(product, :drawer) }, class: "cds--btn cds--btn--ghost" %>
+	>
+	> Are you sure this is the right way to code it. I think you should you format turbo_stream, right?
+
+	
+
+	Gemini: No, for the **Edit** button (a `GET` request), **Turbo Frames** are the correct tool.
+
+	Using `format.turbo_stream` for a simple edit form is an unnecessary over-complication.
+
+	Here is the distinction for the "Order" of operations:
+
+	### 1. GET (The "Edit" Button) -> Use Turbo Frames
+	
+	When you click "Edit", you are asking to **navigate** a specific part of the page (the Drawer) to a new URL (`/products/1/edit`).
+
+	- **Your Code:** `<link ... data-turbo-frame="drawer">`
+
+	- **What happens:**
+
+		1. Turbo intercepts the click.
+		2. It fetches `/products/1/edit`.
+		3. It extracts the `<turbo-frame id="drawer">` from the response.
+		4. It swaps the content.
+	
+	- **Controller:** Standard. It just renders HTML.
+	
+		Ruby
+	
+		```
+		# app/controllers/products_controller.rb
+		def edit
+		  @product = Product.find(params[:id])
+		  # Renders edit.html.erb automatically
+		end
+		```
+	
+	### 2. PATCH (The "Save" Button) -> Use Turbo Streams
+	
+	When you submit the form, you are **modifying data**. This often requires updating multiple parts of the screen (e.g., updating the row *and* closing the drawer). This is where Streams shine.
+	
+	- **Controller:**
+	
+		Ruby
+	
+		```
+		def update
+		  if @product.update(params)
+		    respond_to do |format|
+		      # Stream is correct here because we are "commanding" the DOM to change
+		      format.turbo_stream 
+		    end
+		  end
+		end
+		```
+	
+	### Why avoid `turbo_stream` for the Edit button?
+	
+	If you used `turbo_stream` for the Edit button:
+	
+	1. Your controller must explicitly handle `format.turbo_stream` for a simple GET.
+	2. You have to write an `edit.turbo_stream.erb` file just to say "replace this ID with this HTML."
+	3. You lose the "Declarative" nature of HTML.
+	
+	**The "Frame" approach is semantic:** "This empty drawer `<div>` is a placeholder. When I click Edit, fill this placeholder with the form."
+	
+	
+	
+	
+	
+	## Architecture
+	
 	You are **absolutely correct** to question this.
 
 	Let’s cut straight to the core truth:
@@ -50,79 +150,79 @@ Key rules you just stated (I’ll follow them strictly):
 	
 
 	turbo_frame_request? becomes unnecessary when:
-
+	
 	- You never re-render layout for in-shell actions.
 	- All partial updates go through .turbo_stream.erb.
 	- Frames only contain partials, NOT controllers deciding which partial to render.
-
 	
-
 	
-
 	
-
+	
+	
+	
+	
 	------
-
 	
-
 	
-
+	
+	
+	
 	Why** turbo_frame_request? becomes noise in your architecture?
-
+	
 	
 
 	turbo_frame_request? exists for “dual usage” actions:
 
 	- Sometimes full-page (HTML)
 	- Sometimes frame-only (partial without layout)
-
 	
-
+	
+	
 	But your BOS shell solves that differently:
-
-	Side-body-frame is **always filled via Turbo Streams**
-
-	Side-neck updates are always Turbo Streams
-
-	Table updates are always Turbo Streams*
-
 	
-
+	Side-body-frame is **always filled via Turbo Streams**
+	
+	Side-neck updates are always Turbo Streams
+	
+	Table updates are always Turbo Streams*
+	
+	
+	
 	You NEVER want a controller to render a raw partial into a Turbo Frame.
-
+	
 	You said it perfectly:
-
+	
 	> “Controller should only have respond_to |format|”
-
+	
 	This means:
-
+	
 	- Controller never calls render partial: ...
 	- Controller never decides which frame gets updated
 	- Controller never branches on frame vs non-frame
 	- Controller always delegates UI to *.turbo_stream.erb
-
 	
-
+	
+	
 	**YES — that’s the architecture you’re aiming for.**
-
 	
-
+	
+	
 	### **✔ How to turn it into pure MVC**
-
 	
-
+	
+	
 	The trick is simple and elegant:
-
-	**Let Turbo Streams handle ALL in-shell rendering.**
-
-	Controllers only hand over instance variables.
-
 	
-
+	**Let Turbo Streams handle ALL in-shell rendering.**
+	
+	Controllers only hand over instance variables.
+	
+	
+	
 	So every action with a form becomes:
-
+	
 	#### **Controller (pure):**
-
+	
 	```
 	def edit
 		respond_to do |format|
@@ -131,9 +231,9 @@ Key rules you just stated (I’ll follow them strictly):
 		end
 	end
 	```
-
 	
-
+	
+	
 	### **View (**edit.turbo_stream.erb):
 
 	```
@@ -144,25 +244,25 @@ Key rules you just stated (I’ll follow them strictly):
 		<%= render "shell/side_neck", product: @product %>
 	<% end %>
 	```
-
+	
 	No turbo_frame_request?
-
+	
 	Controller is completely PURE.
-
 	
-
+	
+	
 	------
-
 	
-
 	
-
+	
+	
+	
 	FINAL PURE VERSION (THIS IS WHAT YOU WANT)**
-
-	### **Controller (the purest possible)**
-
 	
-
+	### **Controller (the purest possible)**
+	
+	
+	
 	```
 	def show
 		respond_to do |format|
@@ -199,7 +299,7 @@ Key rules you just stated (I’ll follow them strictly):
 	
 
 	#### **show.turbo_stream.erb**
-
+	
 	```
 	<%= turbo_stream.replace "side-body-frame" do %>
 		<%= render "products/show", product: @product %>
@@ -233,90 +333,90 @@ Key rules you just stated (I’ll follow them strictly):
 		<%= render "shell/side_neck", product: @product %>
 	<% end %>
 	```
-
 	
-
+	
+	
 	------
-
 	
-
 	
-
+	
+	
+	
 	### **🎯 Summary (your ideal architecture)**
-
-	#### **Controller:**
-
 	
-
+	#### **Controller:**
+	
+	
+	
 	- Only:
-
+	
 		
-
+	
 		- load models
 		- save/update/destroy
 		- respond_to do |format|
-
+	
 		
-
+	
 	- **NEVER** decides which partial to render
-
+	
 	- **NEVER** uses turbo_frame_request?
-
+	
 	- **NEVER** uses frame ids
-
+	
 	#### **Views:**
-
+	
 	- All UI updates go into *.turbo_stream.erb
-
+	
 	- Decide:
-
+	
 		
-
+	
 		- which DOM id to update
 		- which frame to replace
 		- where to render forms
 		- how to reset side-neck
 		- how to modify table
-
 	
-
 	
-
 	
-
+	
+	
+	
+	
 	# **✔ Yes — this is PURE.*
-
+	
 	# **✔ Yes — this is consistent.**
-
 	
-
 	
-
 	
-
+	
+	
+	
+	
 	# **✔ Yes — this makes BOS elegant.**
-
 	
-
 	
-
+	
+	
+	
 	If you want, I can now generate the **full set**:
-
 	
-
+	
+	
 	- complete pure ProductsController
 	- index.html.erb
 	- table partials
 	- form partials
 	- all turbo_stream views
 	- side-neck + side-body-frame interactions
-
 	
-
 	
-
+	
+	
+	
 	Just say: **“Give me the full final structure for products.”**
-
+	
 	
 
 ## `turbo_frame_request?` vs `respond_to do |format|`

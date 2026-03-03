@@ -11,30 +11,4 @@ It consists of several modules:
 
 ==Rails users only directly interface with the Action Controller module.== Necessary Action Dispatch functionality is activated by default and Action View rendering is implicitly triggered by Action Controller.
 
-## Routing
-
-The Rails router matches incoming HTTP requests to specific controller actions in your Rails application based on the URL path. The router also generates path and URL helpers based on the resources configured in the router.
-
-### Routes
-
-Routes' primary purpose is to connect view to controller, and they also serve as a UI element--URL.
-
-Rules:
-
-* Always use canonical routes that conform to Rails’ defaults.
-* Avoid custom actions in favor of creating new resources that use Rails’\
-	default actions.
-* User-friendly URLs should be added in addition to the canonical routes.
-
-==Using resources to define routes: `resources :widgets`. It's the best way.==
-
-`bin/rails routes -g widgets`
-
-If the app’s routes are made up entirely of calls to resources, it becomes easy to understand the app at a high level.
-
-
-
 ## ActionDispatch
-
-![Untitled](/Users/Hailei/Downloads/Untitled.svg)
-

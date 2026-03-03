@@ -30,7 +30,7 @@ You can configure how Turbo handles scrolling with a `<meta name="turbo-refresh-
 
 The possible values are `preserve` or `reset` (the default). When it is `preserve`, when a page refresh happens, Turbo will keep the page’s vertical and horizontal scroll.
 
-## [﹟](https://turbo.hotwired.dev/handbook/page_refreshes#exclude-sections-from-morphing)Exclude sections from morphing
+## Exclude sections from morphing
 
 Sometimes, you want to ignore certain elements while morphing. For example, you might have a popover that you want to keep open when the page refreshes. You can flag such elements with `data-turbo-permanent`, and Turbo won’t attempt to morph them.
 
@@ -38,18 +38,18 @@ Sometimes, you want to ignore certain elements while morphing. For example, you 
 <div data-turbo-permanent>...</div>
 ```
 
-## [﹟](https://turbo.hotwired.dev/handbook/page_refreshes#turbo-frames)Turbo frames
+## Turbo frames
 
-You can use [turbo frames](https://turbo.hotwired.dev/handbook/frames.html) to define regions in your screen that will get reloaded using morphing when a page refresh happens. To do so, you must flag those frames with `refresh="morph"`.
+You can use turbo frames to define regions in your screen that will get reloaded using morphing when a page refresh happens. To do so, you must flag those frames with `refresh="morph"`.
 
 ```html
 <turbo-frame id="my-frame" refresh="morph" src="/my_frame">
 </turbo-frame>
 ```
 
-With this mechanism, you can load additional content that didn’t arrive in the initial page load (e.g., pagination). When a page refresh happens, Turbo won’t remove the frame contents; instead, it will reload the turbo frame and render its contents with morphing.
+With this mechanism, ==you can load additional content that didn’t arrive in the initial page load (e.g., pagination).== When a page refresh happens, Turbo won’t remove the frame contents; instead, it will reload the turbo frame and render its contents with morphing.
 
-## [﹟](https://turbo.hotwired.dev/handbook/page_refreshes#broadcasting-page-refreshes)Broadcasting page refreshes
+## Broadcasting page refreshes
 
 There is a new [turbo stream action](https://turbo.hotwired.dev/handbook/streams.html) called `refresh` that will trigger a page refresh:
 
